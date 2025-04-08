@@ -16,3 +16,6 @@ class PostService:
         new_post.validate()
         # Persist using the repository and return the stored post with an assigned ID
         return self.repository.create(new_post)
+
+    def get_all_posts(self) -> list:
+        return self.repository.get_all()

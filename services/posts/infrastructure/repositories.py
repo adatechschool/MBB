@@ -24,3 +24,14 @@ class PostRepository:
             content=post_model.content,
             created_at=post_model.created_at
         )
+
+    def get_all(self) -> list:
+        posts = PostModel.objects.all()
+        return [
+            Post(
+                id=post.id,
+                title=post.title,
+                content=post.content,
+                created_at=post.created_at
+            ) for post in posts
+        ]

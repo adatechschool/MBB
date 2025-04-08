@@ -28,3 +28,9 @@ class CreatePostView(APIView):
             except ValueError as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ListPostView(APIView):
+    def get(self, request, *args, **kwargs):
+        posts = post_service.get_all_posts()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -9,6 +9,8 @@ env/
 .venv/
 ENV/
 
+.env
+
 # Distribution / packaging
 build/
 develop-eggs/

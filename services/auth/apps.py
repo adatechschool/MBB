@@ -1,8 +1,6 @@
-# services\posts\apps.py
-
 from django.apps import AppConfig
 
 
-class PostsConfig(AppConfig):
+class AuthConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'services.posts'
+    name = 'auth'

@@ -17,17 +17,21 @@ class CreatePostView(APIView):
             try:
                 post = post_service.create_post(
                     title=serializer.validated_data['title'],
-                    content=serializer.validated_data['content']
+                    content=serializer.validated_data['content'],
+                    user=request.user  # Pass the authenticated user
                 )
                 return Response({
                     'id': post.id,
                     'title': post.title,
                     'content': post.content,
-                    'created_at': post.created_at
+                    'created_at': post.created_at,
+                    'updated_at': post.updated_at,
+                    'user': post.user.username  # or any user field you wish to return
                 }, status=status.HTTP_201_CREATED)
             except ValueError as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ListPostView(APIView):
     def get(self, request, *args, **kwargs):

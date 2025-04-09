@@ -19,7 +19,7 @@ Il est fortement recommandé d’utiliser un environnement virtuel pour isoler l
 
 - **Création de l’environnement**  
   ```bash
-  python -m venv env
+  python -m venv venv
   ```
 - **Activation de l’environnement**  
   - Sur **Linux/macOS** :

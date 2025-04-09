@@ -294,3 +294,381 @@ Ce projet Django présente une architecture bien structurée, reposant sur la s�
 - **Les interfaces** exposent l’application via des endpoints API.
 
 Ainsi, le projet offre une base solide pour développer une application web évolutive, avec une bonne prise en charge des tests et une configuration flexible qui permet d’adapter l’environnement de déploiement en production.
+
+---
+
+Voici une démarche structurée, inspirée de l’architecture du microservice "posts", pour développer un microservice "comments" en adoptant le développement piloté par les tests (TDD). Chaque étape précise non seulement la mise en place de la nouvelle fonctionnalité mais aussi l’intégration progressive des tests pour s’assurer de la qualité du code.
+
+---
+
+## 1. Analyse des Besoins et Conception du Domaine
+
+**Objectif fonctionnel :**  
+- Permettre la création de commentaires associés à un post.  
+- Récupérer l’ensemble des commentaires d’un post.
+
+**Identification des entités et attributs :**  
+- **Comment**  
+  - **id** : identifiant unique
+  - **post_id** : identifiant du post auquel le commentaire est rattaché
+  - **content** : contenu du commentaire
+  - **author** *(optionnel)* : auteur du commentaire
+  - **created_at** : date et heure de création  
+
+**Décisions sur la validation métier :**  
+- Un commentaire doit avoir un contenu non vide.
+- (Optionnel) L’association avec un post existant peut être vérifiée dans un service applicatif.
+
+---
+
+## 2. Mise en Place de la Structure du Microservice "comments"
+
+Créez un répertoire `services/comments` avec une organisation similaire à celle du microservice posts :
+
+```
+services/
+└── comments/
+    ├── application/
+    │   └── services.py
+    ├── domain/
+    │   ├── models.py
+    │   └── value_objects.py  # si nécessaire
+    ├── infrastructure/
+    │   ├── repositories.py
+    │   └── serializers.py
+    ├── interfaces/
+    │   ├── urls.py
+    │   └── views.py
+    ├── tests/
+    │   ├── test_services.py
+    │   └── test_views.py
+    └── migrations/
+        └── __init__.py
+```
+
+Cette séparation en dossiers permet de maintenir une architecture claire, similaire à celle du microservice posts.
+
+---
+
+## 3. Écriture des Tests (TDD - Cycle Red/Green/Refactor)
+
+### 3.1. Tests Unitaires pour le Domaine et le Service d’Application
+
+- **Création des tests pour le modèle de domaine et la logique de création de commentaire.**  
+  Par exemple, dans `services/comments/tests/test_services.py`, écrivez des tests qui vérifient :
+  - La création réussie d’un commentaire avec un contenu valide.
+  - Le déclenchement d’une exception lorsque le contenu est vide.
+  - (Optionnel) La gestion de l'association avec un post via le champ `post_id`.
+
+*Exemple de test unitaire :*
+
+```python
+import pytest
+from datetime import datetime, timezone
+from services.comments.application.services import CommentService
+from services.comments.domain.models import Comment
+
+class DummyCommentRepository:
+    def __init__(self):
+        self.comments = []
+        self.current_id = 1
+
+    def create(self, comment: Comment) -> Comment:
+        new_comment = Comment(
+            id=self.current_id,
+            post_id=comment.post_id,
+            content=comment.content,
+            author=comment.author,
+            created_at=datetime.now(timezone.utc)
+        )
+        self.comments.append(new_comment)
+        self.current_id += 1
+        return new_comment
+
+@pytest.fixture
+def dummy_repo():
+    return DummyCommentRepository()
+
+@pytest.fixture
+def comment_service(dummy_repo):
+    return CommentService(dummy_repo)
+
+def test_create_comment_success(comment_service):
+    post_id = 1
+    content = "Ceci est un commentaire de test."
+    author = "AuteurTest"
+    comment = comment_service.create_comment(post_id, content, author)
+    assert comment.id > 0
+    assert comment.post_id == post_id
+    assert comment.content == content
+    assert comment.author == author
+
+def test_create_comment_fail_empty_content(comment_service):
+    post_id = 1
+    with pytest.raises(ValueError) as excinfo:
+        comment_service.create_comment(post_id, "", "AuteurTest")
+    assert "Content cannot be empty" in str(excinfo.value)
+```
+
+### 3.2. Tests d’Intégration pour l’Interface API
+
+- **Tests pour les endpoints API**  
+  Dans `services/comments/tests/test_views.py`, écrivez des tests pour :
+  - Le POST permettant de créer un commentaire.
+  - Le GET permettant de récupérer la liste des commentaires d’un post.
+
+*Exemple de test d’API :*
+
+```python
+import pytest
+from django.urls import reverse
+
+@pytest.mark.django_db
+def test_create_comment_api(client):
+    url = reverse('create-comment')
+    data = {
+        "post_id": 1,
+        "content": "Commentaire via API",
+        "author": "AuteurAPI"
+    }
+    response = client.post(url, data, content_type='application/json')
+    assert response.status_code == 201
+    json_response = response.json()
+    assert json_response['content'] == data['content']
+
+@pytest.mark.django_db
+def test_list_comments_api(client):
+    url = reverse('list-comments')  # On peut prévoir un endpoint pour filtrer par post
+    response = client.get(url, {'post_id': 1})
+    assert response.status_code == 200
+```
+
+**Cycle TDD :**  
+1. **Rouge :** Écrire le test qui échoue (car le code n’existe pas encore).
+2. **Vert :** Implémenter le minimum de code (dans le modèle, service, repository ou vues) pour faire passer le test.
+3. **Refactorer :** Améliorer le code en gardant tous les tests verts.
+
+---
+
+## 4. Implémentation Progressive
+
+### 4.1. Couche Domaine
+
+*Fichier : `services/comments/domain/models.py`*
+
+```python
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass(frozen=True)
+class Comment:
+    id: int
+    post_id: int
+    content: str
+    author: str
+    created_at: datetime
+
+    def validate(self):
+        if not self.content or not self.content.strip():
+            raise ValueError("Content cannot be empty.")
+        # On pourrait ajouter d'autres validations, par exemple la vérification de l'existence d'un post
+```
+
+### 4.2. Couche Application
+
+*Fichier : `services/comments/application/services.py`*
+
+```python
+from datetime import datetime, timezone
+from services.comments.domain.models import Comment
+
+class CommentService:
+    def __init__(self, repository):
+        self.repository = repository
+
+    def create_comment(self, post_id: int, content: str, author: str) -> Comment:
+        new_comment = Comment(
+            id=0,
+            post_id=post_id,
+            content=content,
+            author=author,
+            created_at=datetime.now(timezone.utc)
+        )
+        new_comment.validate()  # Valider le contenu
+        return self.repository.create(new_comment)
+
+    def get_comments_by_post(self, post_id: int) -> list:
+        return self.repository.get_by_post(post_id)
+```
+
+### 4.3. Couche Infrastructure
+
+#### a) Repository
+
+*Fichier : `services/comments/infrastructure/repositories.py`*
+
+- Créez un modèle Django pour la persistance.
+
+```python
+from django.db import models
+
+class CommentModel(models.Model):
+    post_id = models.IntegerField()
+    content = models.TextField()
+    author = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+```
+
+- Implémentez ensuite le repository.
+
+```python
+from services.comments.domain.models import Comment
+from .models import CommentModel
+
+class CommentRepository:
+    def create(self, comment: Comment) -> Comment:
+        comment_model = CommentModel.objects.create(
+            post_id=comment.post_id,
+            content=comment.content,
+            author=comment.author
+        )
+        return Comment(
+            id=comment_model.id,
+            post_id=comment_model.post_id,
+            content=comment_model.content,
+            author=comment_model.author,
+            created_at=comment_model.created_at
+        )
+
+    def get_by_post(self, post_id: int) -> list:
+        comment_models = CommentModel.objects.filter(post_id=post_id)
+        return [
+            Comment(
+                id=c.id,
+                post_id=c.post_id,
+                content=c.content,
+                author=c.author,
+                created_at=c.created_at
+            )
+            for c in comment_models
+        ]
+```
+
+#### b) Serializer
+
+*Fichier : `services/comments/infrastructure/serializers.py`*
+
+Utilisez Django REST Framework pour sérialiser l’objet Comment.
+
+```python
+from rest_framework import serializers
+
+class CommentSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    post_id = serializers.IntegerField()
+    content = serializers.CharField()
+    author = serializers.CharField(max_length=255)
+    created_at = serializers.DateTimeField(read_only=True)
+```
+
+### 4.4. Couche Interfaces
+
+#### a) Vues et Endpoints API
+
+*Fichier : `services/comments/interfaces/views.py`*
+
+Implémentez les vues basées sur APIView pour gérer les requêtes.
+
+```python
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from services.comments.application.services import CommentService
+from services.comments.infrastructure.repositories import CommentRepository
+from services.comments.infrastructure.serializers import CommentSerializer
+
+# Instanciation du service avec le repository concret
+comment_service = CommentService(CommentRepository())
+
+class CreateCommentView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = CommentSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                comment = comment_service.create_comment(
+                    post_id=serializer.validated_data['post_id'],
+                    content=serializer.validated_data['content'],
+                    author=serializer.validated_data['author']
+                )
+                return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+            except ValueError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ListCommentView(APIView):
+    def get(self, request, *args, **kwargs):
+        post_id = request.query_params.get('post_id')
+        if post_id is None:
+            return Response({'error': 'post_id parameter is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        comments = comment_service.get_comments_by_post(post_id=int(post_id))
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+```
+
+#### b) Définition des URL
+
+*Fichier : `services/comments/interfaces/urls.py`*
+
+```python
+from django.urls import path
+from services.comments.interfaces.views import CreateCommentView, ListCommentView
+
+urlpatterns = [
+    path('comments/', CreateCommentView.as_view(), name='create-comment'),
+    path('comments/all/', ListCommentView.as_view(), name='list-comments'),
+]
+```
+
+Pour intégrer ces endpoints dans l’URL globale, incluez-les dans le fichier `config/urls.py` ou dans la configuration de votre API Gateway.
+
+---
+
+## 5. Exécution des Tests et Itérations
+
+1. **Lancer les tests unitaires et d’intégration avec Pytest**  
+   ```bash
+   pytest
+   ```
+   Vous devriez voir vos tests échouer initialement (rouge) avant que vous n’ayez implémenté le code minimal permettant de les faire passer (vert).
+
+2. **Cycle TDD :**  
+   - **Red :** Écrire d’abord les tests dans `tests/test_services.py` et `tests/test_views.py` avant d’implémenter les fonctionnalités.
+   - **Green :** Implémenter le code minimal dans chaque couche pour faire passer les tests.
+   - **Refactor :** Améliorer et nettoyer le code tout en s’assurant que tous les tests restent verts.
+
+3. **Répéter le cycle** pour chaque nouvelle fonctionnalité (par exemple, ajout de validations supplémentaires, gestion d'erreurs plus fine, etc.).
+
+---
+
+## 6. Documentation et Vérifications Finales
+
+- **Vérifiez la documentation de l’API** en utilisant Swagger ou Redoc, ce qui peut être intégré avec Django REST Framework, afin de fournir des exemples d’appels aux endpoints.
+- **Mettre à jour le fichier `requirements.txt`** avec toutes les nouvelles dépendances éventuellement ajoutées pour le microservice "comments" (même si dans un contexte de microservices vous pouvez avoir un dépôt par microservice ou un monorepo bien structuré).
+
+---
+
+## Résumé de la Démarche Étape par Étape
+
+1. **Analyse des exigences :** Définir la fonctionnalité et le modèle de domaine pour les commentaires.
+2. **Création de la structure :** Mettre en place le répertoire `services/comments` avec les dossiers `domain`, `application`, `infrastructure`, `interfaces` et `tests`.
+3. **Écriture des tests (TDD) :** Rédiger d’abord les tests unitaires pour la logique métier et d’intégration pour les endpoints API.
+4. **Implémentation du domaine :** Créer la dataclass `Comment` dans le dossier `domain` avec la méthode de validation.
+5. **Développement de la logique applicative :** Implémenter `CommentService` dans le dossier `application`.
+6. **Création du repository et du modèle ORM :** Implémenter le modèle Django `CommentModel` et le `CommentRepository` dans le dossier `infrastructure`.
+7. **Développement de l’interface API :** Créer les serializers, vues et les routes dans le dossier `interfaces`.
+8. **Exécution et itérations TDD :** Lancer les tests, corriger le code, refactorer et s’assurer que le cycle TDD est respecté.
+9. **Documentation et intégration globale :** Finaliser la configuration des URLs globales et mettre à jour la documentation du service.
+
+---
+
+En suivant cette démarche détaillée et en adoptant le cycle TDD, vous pourrez développer et intégrer un microservice "comments" robuste, testable et maintenable dans une architecture multi-microservices inspirée du projet "posts".

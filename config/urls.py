@@ -22,4 +22,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('services.posts.interfaces.urls')),
+    path('api/', include('services.users.interface.urls')),
 ]

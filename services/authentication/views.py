@@ -1,4 +1,4 @@
-# services\auth\views.py
+# services\authentication\views.py
 
 from django.shortcuts import render
 

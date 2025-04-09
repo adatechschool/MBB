@@ -1,4 +1,4 @@
-# services\auth\tests.py
+# services\authentication\tests.py
 
 from django.test import TestCase
 

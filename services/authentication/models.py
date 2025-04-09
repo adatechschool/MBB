@@ -1,4 +1,4 @@
-# services\auth\models.py
+# services\authentication\models.py
 
 from django.db import models
 

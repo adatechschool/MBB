@@ -4,6 +4,13 @@ from django.db import models
 from dataclasses import dataclass
 from datetime import datetime
 
+class PostModel(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
 
 @dataclass(frozen=True)
 class Post:

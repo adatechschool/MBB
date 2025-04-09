@@ -1,15 +1,6 @@
 # services/posts/infrastructure/repositories.py
 
-from services.posts.domain.models import Post
-from django.db import models
-
-# Optionally, define a Django model that corresponds to your domain entity
-
-
-class PostModel(models.Model):
-    title = models.CharField(max_length=255)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+from services.posts.domain.models import Post, PostModel
 
 
 class PostRepository:

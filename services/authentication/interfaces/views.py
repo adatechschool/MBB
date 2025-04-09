@@ -3,6 +3,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny  # Import this
 from services.authentication.application.services import AuthService
 from services.authentication.infrastructure.repositories import AuthRepository
 from services.authentication.infrastructure.serializers import LoginSerializer, RegisterSerializer, SessionSerializer
@@ -12,6 +13,8 @@ auth_service = AuthService(AuthRepository())
 
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]  # Allow unauthenticated access
+
     def post(self, request, *args, **kwargs):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -31,6 +34,8 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]  # Allow unauthenticated access
+
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -47,8 +52,13 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    # Typically, logout may require a valid token.
+    # You can choose to require authentication or override with AllowAny if needed.
+    # For now, if you want to allow token-based access without CSRF issues, you might leave it as is
+    # or explicitly set an authentication class accordingly.
+    permission_classes = [AllowAny]
+
     def post(self, request, *args, **kwargs):
-        # Expect the token in the Authorization header with the format "Bearer <token>"
         auth_header = request.headers.get('Authorization')
         if auth_header:
             token = auth_header.split(" ")[-1]

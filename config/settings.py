@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'services.posts.apps.PostsConfig',
     'services.authentication.apps.AuthConfig',
     "corsheaders",
+    'services.likes.apps.LikesConfig',
 ]
 
 REST_FRAMEWORK = {

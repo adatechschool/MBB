@@ -32,9 +32,9 @@ class AuthService:
         if not check_password(password, user.password):
             raise ValueError("Invalid username or password.")
 
-        # Generate a token and create a new authentication session (valid for 1 hour)
+        # Generate a token and create a new authentication session (valid for 1 day)
         token = str(uuid.uuid4())
-        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+        expires_at = datetime.now(timezone.utc) + timedelta(days=1)
         session = self.repository.create_session(user, token, expires_at)
         return session
 

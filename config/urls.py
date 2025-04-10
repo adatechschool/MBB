@@ -24,5 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/posts/', include('services.posts.interfaces.urls')),
     path('api/auth/', include('services.authentication.interfaces.urls')),
+    path('api/users/', include('services.users.interfaces.urls')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
 ]

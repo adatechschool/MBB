@@ -13,7 +13,7 @@ def test_create_post_api(client):
     default_role, _ = RoleModel.objects.get_or_create(role_name=RoleModel.USER)
     user = User.objects.create_user(
         username="api_post_user", password="testpass", role=default_role)
-    client.force_login(user)
+    client.force_authenticate(user=user)
     url = reverse('create-post')  # Make sure this name matches your URLs
     data = {
         "title": "API Test Post",

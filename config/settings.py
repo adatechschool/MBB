@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'services.posts.apps.PostsConfig',
     'services.authentication.apps.AuthConfig',
+    'services.likes.apps.LikesConfig',
 ]
 
 REST_FRAMEWORK = {

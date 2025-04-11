@@ -18,3 +18,7 @@ pytest-django>=4.4
 
 # Connecteur PostgreSQL (adapté pour le paramétrage django.db.backends.postgresql)
 psycopg2-binary>=2.9
+
+
+# django-cors-headers pour gérer les politiques CORS
+django-cors-headers>=3.13

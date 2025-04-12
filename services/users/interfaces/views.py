@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from services.users.application.services import UserService
 from services.users.infrastructure.repositories import UserRepository
-from services.users.interfaces.serializers import UserUpdateSerializer
+from services.users.infrastructure.serializers import UserUpdateSerializer
 
 
 class UserDetailView(APIView):

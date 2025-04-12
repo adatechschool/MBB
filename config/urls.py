@@ -18,14 +18,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/posts/', include('services.posts.interfaces.urls')),
     path('api/auth/', include('services.authentication.interfaces.urls')),
     path('api/users/', include('services.users.interfaces.urls')),
-    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
     path('api/likes/', include('services.likes.interfaces.urls')),
 ]
 

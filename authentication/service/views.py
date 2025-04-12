@@ -1,5 +1,8 @@
-# authentication\service\views.py
+# authentication/service/views.py
 
-from django.shortcuts import render
+from django.urls import path
+from service.interface_adapters.controllers.auth_controller import AuthController
 
-# Create your views here.
+urlpatterns = [
+    path('login/', AuthController.as_view(), name='login'),
+]

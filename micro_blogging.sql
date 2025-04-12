@@ -10,12 +10,10 @@ CREATE TABLE
         "bio" TEXT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT now (),
+            TIME zone NOT NULL DEFAULT 'now()',
             "updated_at" TIMESTAMP(0)
         WITH
-            TIME zone NULL,
-            "follower_id" INTEGER NULL,
-            "followee_id" INTEGER NULL
+            TIME zone NULL
     );
 
 ALTER TABLE "User" ADD PRIMARY KEY ("user_id");
@@ -29,7 +27,7 @@ CREATE TABLE
         "post_content" TEXT NOT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT now (),
+            TIME zone NOT NULL DEFAULT 'now()',
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL
@@ -45,7 +43,7 @@ CREATE TABLE
         "comment_content" TEXT NOT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT now (),
+            TIME zone NOT NULL DEFAULT 'now()',
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL
@@ -63,14 +61,7 @@ CREATE TABLE
 ALTER TABLE "Like" ADD PRIMARY KEY ("like_id");
 
 CREATE TABLE
-    "Post_Hashtag" (
-        "post_id" INTEGER NOT NULL,
-        "hashtag_id" INTEGER NOT NULL
-    );
-
-ALTER TABLE "Post_Hashtag" ADD PRIMARY KEY ("post_id");
-
-ALTER TABLE "Post_Hashtag" ADD PRIMARY KEY ("hashtag_id");
+    "Post_Hashtag" ("post_id" INTEGER NULL, "hashtag_id" INTEGER NULL);
 
 CREATE TABLE
     "Hashtag" (
@@ -95,7 +86,7 @@ CREATE TABLE
         "token" VARCHAR(255) NOT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT now (),
+            TIME zone NOT NULL DEFAULT 'now()',
             "expires_at" TIMESTAMP(0)
         WITH
             TIME zone NOT NULL
@@ -109,12 +100,8 @@ CREATE TABLE
         "followee_id" INTEGER NOT NULL,
         "followed_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT now ()
+            TIME zone NOT NULL DEFAULT 'now()'
     );
-
-ALTER TABLE "Follow" ADD PRIMARY KEY ("follower_id");
-
-ALTER TABLE "Follow" ADD PRIMARY KEY ("followee_id");
 
 CREATE TABLE
     "Media" (
@@ -124,7 +111,7 @@ CREATE TABLE
         "media_content" bytea NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT now (),
+            TIME zone NOT NULL DEFAULT 'now()',
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL
@@ -132,25 +119,23 @@ CREATE TABLE
 
 ALTER TABLE "Media" ADD PRIMARY KEY ("media_id");
 
-ALTER TABLE "Media" ADD CONSTRAINT "media_post_id_unique" UNIQUE ("post_id");
-
 ALTER TABLE "Comment" ADD CONSTRAINT "comment_post_id_foreign" FOREIGN KEY ("post_id") REFERENCES "Post" ("post_id");
 
 ALTER TABLE "Media" ADD CONSTRAINT "media_post_id_foreign" FOREIGN KEY ("post_id") REFERENCES "Post" ("post_id");
 
 ALTER TABLE "Post_Hashtag" ADD CONSTRAINT "post_hashtag_post_id_foreign" FOREIGN KEY ("post_id") REFERENCES "Post" ("post_id");
 
-ALTER TABLE "Hashtag" ADD CONSTRAINT "hashtag_hashtag_id_foreign" FOREIGN KEY ("hashtag_id") REFERENCES "Post_Hashtag" ("hashtag_id");
+ALTER TABLE "Post_Hashtag" ADD CONSTRAINT "post_hashtag_hashtag_id_foreign" FOREIGN KEY ("hashtag_id") REFERENCES "Hashtag" ("hashtag_id");
 
 ALTER TABLE "Session" ADD CONSTRAINT "session_user_id_foreign" FOREIGN KEY ("user_id") REFERENCES "User" ("user_id");
 
 ALTER TABLE "Post" ADD CONSTRAINT "post_user_id_foreign" FOREIGN KEY ("user_id") REFERENCES "User" ("user_id");
 
+ALTER TABLE "Follow" ADD CONSTRAINT "follow_followee_id_foreign" FOREIGN KEY ("followee_id") REFERENCES "User" ("user_id");
+
 ALTER TABLE "User" ADD CONSTRAINT "user_role_id_foreign" FOREIGN KEY ("role_id") REFERENCES "Role" ("role_id");
 
-ALTER TABLE "User" ADD CONSTRAINT "user_followee_id_foreign" FOREIGN KEY ("followee_id") REFERENCES "Follow" ("followee_id");
-
-ALTER TABLE "User" ADD CONSTRAINT "user_follower_id_foreign" FOREIGN KEY ("follower_id") REFERENCES "Follow" ("follower_id");
+ALTER TABLE "Follow" ADD CONSTRAINT "follow_follower_id_foreign" FOREIGN KEY ("follower_id") REFERENCES "User" ("user_id");
 
 ALTER TABLE "Like" ADD CONSTRAINT "like_post_id_foreign" FOREIGN KEY ("post_id") REFERENCES "Post" ("post_id");
 

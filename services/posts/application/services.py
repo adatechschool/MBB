@@ -1,7 +1,7 @@
 # services\posts\application\services.py
 
 from datetime import datetime, timezone
-from services.posts.domain.models import Post
+from services.posts.domain.value_objects import PostDTO
 from services.posts.infrastructure.repositories import PostRepository
 
 
@@ -9,10 +9,10 @@ class PostService:
     def __init__(self, repository: PostRepository):
         self.repository = repository
 
-    def create_post(self, title: str, content: str, user) -> Post:
+    def create_post(self, title: str, content: str, user) -> PostDTO:
         # Instantiate domain entity with all required fields
         now = datetime.now(timezone.utc)
-        new_post = Post(
+        new_post = PostDTO(
             id=0,
             title=title,
             content=content,

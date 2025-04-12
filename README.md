@@ -144,7 +144,7 @@ Le projet expose des endpoints pour les opérations CRUD sur les posts à traver
 ### Remarques complémentaires
 
 - **Bonnes pratiques en développement** :  
-  - Assurez-vous que le fichier `.gitignore` inclut bien les fichiers et répertoires à ne pas suivre en versionnement (comme les fichiers de configuration sensibles, les dossiers d'environnement virtuel, les logs, etc.).
+  - Assurez-vous que le fichier `.gitignore` inclut bien les fichiers et répertoires à ne pas suivre en versionnage (comme les fichiers de configuration sensibles, les dossiers d'environnement virtuel, les logs, etc.).
   - N’oubliez pas d’adapter le paramètre `DEBUG` et les autres réglages de sécurité lorsque vous déployez l’application en production.
   
 - **Structure du projet** :  

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 from services.authentication.infrastructure.repositories import AuthRepository
-from services.posts.domain.models import RoleModel
+from services.roles.domain.models import RoleModel
 
 User = get_user_model()
 

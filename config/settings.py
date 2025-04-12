@@ -43,11 +43,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'services.posts.apps.PostsConfig',
+    "corsheaders",
     'services.authentication.apps.AuthConfig',
     "corsheaders",
     'services.likes.apps.LikesConfig',
-    "corsheaders",
+    'services.posts.apps.PostsConfig',
+    'services.roles.apps.RolesConfig',
+    'services.users.apps.UsersConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -115,7 +117,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "posts.UserModel"
+AUTH_USER_MODEL = "users.UserModel"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

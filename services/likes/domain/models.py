@@ -1,3 +1,5 @@
+# services\likes\domain\models.py
+
 from django.db import models
 from services.posts.domain.models import UserModel, PostModel
 from dataclasses import dataclass

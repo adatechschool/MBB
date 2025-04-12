@@ -1,3 +1,5 @@
+# services\likes\apps.py
+
 from django.apps import AppConfig
 
 

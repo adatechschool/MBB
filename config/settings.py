@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "corsheaders",
     'services.authentication.apps.AuthConfig',
-    "corsheaders",
     'services.likes.apps.LikesConfig',
     'services.posts.apps.PostsConfig',
     'services.roles.apps.RolesConfig',

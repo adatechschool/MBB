@@ -25,3 +25,6 @@ django-cors-headers>=3.13
 
 # SQLAlchemy Code Generator pour convertir des bases PostgreSQL en classes Python
 sqlacodegen
+
+# PyJWT pour gérer les tokens JWT
+PyJWT

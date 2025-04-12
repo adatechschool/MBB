@@ -23,6 +23,5 @@ class AuthSession(models.Model):
         return timezone.now() < self.expires_at
 
     class Meta:
-        # Explicitly set the app_label so Django associates this model with the auth app.
         app_label = 'authentication'
         db_table = "authentication_authsession"

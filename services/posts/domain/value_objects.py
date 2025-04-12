@@ -8,10 +8,10 @@ from services.users.domain.models import UserModel
 class PostDTO:
     id: int
     title: str
+    user: UserModel
     content: str
     created_at: datetime
     updated_at: datetime
-    user: UserModel
 
     def validate(self):
         if not self.title or not self.title.strip():

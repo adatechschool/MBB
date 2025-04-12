@@ -1,7 +1,8 @@
-from services.likes.domain.models import Like, LikeModel
+from services.likes.domain.models import LikeModel
+from services.likes.domain.value_objects import LikeDTO
 
 class LikeRepository:
-    def create(self, like: Like) -> LikeModel:
+    def create(self, like: LikeDTO) -> LikeModel:
         like_model = LikeModel(
             user=like.user,
             post=like.post

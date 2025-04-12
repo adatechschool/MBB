@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from services.posts.domain.models import RoleModel
+from services.roles.domain.models import RoleModel
 
 User = get_user_model()
 

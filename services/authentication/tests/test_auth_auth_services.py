@@ -5,7 +5,7 @@ from services.authentication.application.services import AuthService
 from services.authentication.infrastructure.repositories import AuthRepository
 from django.contrib.auth import get_user_model
 from services.authentication.domain.models import AuthSession
-from services.posts.domain.models import RoleModel
+from services.roles.domain.models import RoleModel
 
 User = get_user_model()
 

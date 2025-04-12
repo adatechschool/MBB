@@ -2,8 +2,9 @@
 
 from django.core.management.base import BaseCommand
 from faker import Faker
-from services.posts.domain.models import PostModel, UserModel, RoleModel
-
+from services.posts.domain.models import PostModel
+from services.roles.domain.models import RoleModel
+from services.users.domain.models import UserModel
 
 class Command(BaseCommand):
     help = 'Populate the Post table with fake data.'

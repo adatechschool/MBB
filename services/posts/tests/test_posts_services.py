@@ -3,7 +3,8 @@
 import pytest
 from datetime import datetime, timezone
 from services.posts.application.services import PostService
-from services.posts.domain.models import Post, RoleModel
+from services.posts.domain.value_objects import PostDTO
+from services.roles.domain.models import RoleModel
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -14,8 +15,8 @@ class DummyPostRepository:
         self.posts = []
         self.current_id = 1
 
-    def create(self, post: Post) -> Post:
-        new_post = Post(
+    def create(self, post: PostDTO) -> PostDTO:
+        new_post = PostDTO(
             id=self.current_id,
             title=post.title,
             content=post.content,

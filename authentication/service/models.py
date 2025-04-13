@@ -61,10 +61,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     for email, username, active status, and staff status.
     """
 
-    email = models.EmailField(unique=True)
-    username = models.CharField(max_length=255, unique=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    email: models.EmailField = models.EmailField(unique=True)
+    username: models.CharField = models.CharField(max_length=255, unique=True)
+    is_active: models.BooleanField = models.BooleanField(default=True)
+    is_staff: models.BooleanField = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 

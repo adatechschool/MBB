@@ -1,6 +1,7 @@
 # authentication\service\interface_adapters\controllers\register_controller.py
 
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from service.application.use_cases.register_user import RegisterUser
@@ -8,6 +9,8 @@ from service.interface_adapters.gateways.django_user_repository import DjangoUse
 from service.interface_adapters.presenters.register_presenter import RegisterPresenter
 
 class RegisterController(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         username = request.data.get("username")
         email = request.data.get("email")

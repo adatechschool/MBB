@@ -29,3 +29,6 @@ types-python-dateutil
 
 # Serveur web
 gunicorn>=20.1.0
+
+# Interface d'administration Django
+django-admin-interface

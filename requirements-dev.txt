@@ -1,0 +1,17 @@
+# requirements-dev.txt
+
+# For formatting
+black>=23.1.0
+
+# For linting
+flake8>=6.0.0
+
+# Outils de test
+pytest>=6.2
+pytest-django>=4.4
+
+# Génération de données factices pour les commandes de population
+Faker>=13.0
+
+# SQLAlchemy Code Generator pour convertir des bases PostgreSQL en classes Python
+sqlacodegen

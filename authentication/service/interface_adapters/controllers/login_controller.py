@@ -16,15 +16,19 @@ class LoginController(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
         if not email or not password:
-            return Response({"error": "Email and password are required"}, status=status.HTTP_400_BAD_REQUEST)
-            
+            return Response(
+                {"error": "Email and password are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         user_repository = DjangoUserRepository()
         use_case = LoginUser(user_repository)
         
         try:
-            token = use_case.execute(email, password)
+            # In this JWT approach, the use case returns a dict with refresh and access tokens.
+            token_data = use_case.execute(email, password)
         except Exception as e:
             raise AuthenticationFailed(str(e))
         
         presenter = LoginPresenter()
-        return presenter.present(token)
+        return presenter.present(token_data)

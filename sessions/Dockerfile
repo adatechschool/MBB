@@ -1,6 +1,6 @@
 # sessions/Dockerfile
 
-FROM python:3.9-slim
+FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1
 
@@ -8,7 +8,7 @@ WORKDIR /app
 
 # If sessions shares the same requirements file as authentication, reuse it.
 # Otherwise adjust as needed.
-COPY requirements.txt /app/
+COPY ../requirements.txt /app/
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . /app/

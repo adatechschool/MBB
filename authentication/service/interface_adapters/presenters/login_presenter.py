@@ -3,8 +3,5 @@
 from rest_framework.response import Response
 
 class LoginPresenter:
-    def present(self, token: str) -> Response:
-        return Response({
-            "token": token,
-            "message": "Authentication successful"
-        })
+    def present(self, token_data):
+        return Response(token_data, status=200)

@@ -1,1 +1,43 @@
 # docker-compose.yml
+
+version: '3.9'
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  authentication:
+    build: ./authentication
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./authentication:/app
+    ports:
+      - "8000:8000"
+    environment:
+      # Ensure Django loads the correct settings and database connection settings
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - DATABASE_ENGINE=django.db.backends.postgresql
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=5432
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DEBUG=${DEBUG}
+
+  sessions:
+    build: ./sessions
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8001
+    volumes:
+      - ./sessions:/app
+    ports:
+      - "8001:8001"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings

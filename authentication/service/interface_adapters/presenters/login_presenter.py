@@ -1,8 +1,8 @@
-# authentication/service/interface_adapters/presenters/auth_presenter.py
+# authentication/service/interface_adapters/presenters/login_presenter.py
 
 from rest_framework.response import Response
 
-class AuthPresenter:
+class LoginPresenter:
     def present(self, token: str) -> Response:
         return Response({
             "token": token,

@@ -8,3 +8,8 @@ class UserRepositoryInterface(ABC):
     def get_by_email(self, email: str) -> UserEntity:
         """Retrieve a user entity based on email."""
         pass
+
+    @abstractmethod
+    def create_user(self, username: str, email: str, password: str) -> UserEntity:
+        """Create and return a new user entity."""
+        pass

@@ -16,3 +16,12 @@ class DjangoUserRepository(UserRepositoryInterface):
             )
         except User.DoesNotExist:
             return None
+
+    def create_user(self, username: str, email: str, password: str) -> UserEntity:
+        user = UserModel.objects.create(username=username, email=email, password=password)
+        return UserEntity(
+            id=user.pk,
+            username=user.username,
+            email=user.email,
+            hashed_password=user.password
+        )

@@ -5,6 +5,7 @@ black>=23.1.0
 
 # For linting
 flake8>=6.0.0
+pylint-django
 
 # Outils de test
 pytest>=6.2

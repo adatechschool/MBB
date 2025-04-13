@@ -1,4 +1,4 @@
-# authentication/service/interface_adapters/gateways/django_user_repository.py
+# authentication\service\application\repositories\django_user_repository.py
 
 """Django implementation of the user repository interface for authentication operations."""
 

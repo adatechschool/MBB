@@ -10,7 +10,7 @@ CREATE TABLE
         "bio" TEXT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT 'now()',
+            TIME zone NOT NULL DEFAULT now(),
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL
@@ -27,7 +27,7 @@ CREATE TABLE
         "post_content" TEXT NOT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT 'now()',
+            TIME zone NOT NULL DEFAULT now(),
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL
@@ -43,7 +43,7 @@ CREATE TABLE
         "comment_content" TEXT NOT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT 'now()',
+            TIME zone NOT NULL DEFAULT now(),
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL
@@ -86,7 +86,7 @@ CREATE TABLE
         "token" VARCHAR(255) NOT NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT 'now()',
+            TIME zone NOT NULL DEFAULT now(),
             "expires_at" TIMESTAMP(0)
         WITH
             TIME zone NOT NULL
@@ -100,7 +100,7 @@ CREATE TABLE
         "followee_id" INTEGER NOT NULL,
         "followed_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT 'now()'
+            TIME zone NOT NULL DEFAULT now()
     );
 
 CREATE TABLE
@@ -111,7 +111,7 @@ CREATE TABLE
         "media_content" bytea NULL,
         "created_at" TIMESTAMP(0)
         WITH
-            TIME zone NOT NULL DEFAULT 'now()',
+            TIME zone NOT NULL DEFAULT now(),
             "updated_at" TIMESTAMP(0)
         WITH
             TIME zone NULL

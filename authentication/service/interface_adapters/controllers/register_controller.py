@@ -47,7 +47,7 @@ class RegisterController(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         user_data = {
-            "id": new_user.id,
+            "user_id": new_user.user_id,
             "username": new_user.username,
             "email": new_user.email,
         }

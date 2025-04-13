@@ -1,0 +1,5 @@
+; .pylintrc
+
+[FORMAT]
+# You can set a lower minimum for public methods if appropriate
+min-public-methods=1

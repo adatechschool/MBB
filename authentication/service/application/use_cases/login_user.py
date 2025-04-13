@@ -1,11 +1,11 @@
-# authentication/service/application/use_cases/authenticate_user.py
+# authentication/service/application/use_cases/login_user.py
 
 import datetime
 import jwt  # make sure you have installed PyJWT (pip install PyJWT)
 from django.contrib.auth.hashers import check_password
 from django.conf import settings
 
-class AuthenticateUser:
+class LoginUser:
     def __init__(self, user_repository):
         self.user_repository = user_repository
 

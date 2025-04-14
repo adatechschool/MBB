@@ -1,4 +1,4 @@
-# sessions\config\settings.py
+# accounts\config\settings.py
 
 """
 Django settings for config project.

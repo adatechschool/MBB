@@ -25,16 +25,6 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings
-      - DATABASE_ENGINE=django.db.backends.postgresql
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=5432
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
-      - DEBUG=${DEBUG}
-    depends_on:
-      - db
 
   sessions:
     build:
@@ -45,6 +35,20 @@ services:
       - ./sessions:/app
     ports:
       - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+
+  accounts:
+    build:
+      context: .
+      dockerfile: accounts/Dockerfile
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8002
+    volumes:
+      - ./accounts:/app
+    ports:
+      - "8002:8002"
     env_file:
       - .env
     environment:

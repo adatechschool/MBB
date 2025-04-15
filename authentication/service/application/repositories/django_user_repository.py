@@ -1,11 +1,11 @@
-# authentication\service\application\repositories\django_user_repository.py
+# authentication/service/application/repositories/django_user_repository.py
 
 """Django implementation of the user repository interface for authentication operations."""
 
 from typing import Optional
 from service.application.repositories.user_repository import UserRepositoryInterface
 from service.core.entities.user import UserEntity
-from service.models import User
+from users.models import User  # This is your custom user model
 
 
 class DjangoUserRepository(UserRepositoryInterface):
@@ -20,11 +20,13 @@ class DjangoUserRepository(UserRepositoryInterface):
                 email=user.email,
                 hashed_password=user.password,
             )
-        except User.objects.model.DoesNotExist:
+        except User.DoesNotExist:
             return None
 
     def create_user(self, username: str, email: str, password: str) -> UserEntity:
-        user = User.objects.create(username=username, email=email, password=password)
+        user = User.objects.create_user(
+            username=username, email=email, password=password
+        )
         return UserEntity(
             user_id=user.pk,
             username=user.username,

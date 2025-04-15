@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "service",
-    "authentication",
+    "users",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
 ]
@@ -120,7 +120,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "users.User"
 
 
 # Password validation

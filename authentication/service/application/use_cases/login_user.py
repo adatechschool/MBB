@@ -30,7 +30,7 @@ class LoginUser:
         Raises:
             Exception: If credentials are invalid
         """
-        user = authenticate(email=email, password=password)
+        user = authenticate(username=email, password=password)
         if not user:
             raise AuthenticationError("Invalid credentials")
 

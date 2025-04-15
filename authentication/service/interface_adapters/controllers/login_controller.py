@@ -1,14 +1,12 @@
 # authentication/service/interface_adapters/controllers/login_controller.py
 
-"""Controller module handling user login authentication requests."""
-
+from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from service.application.repositories.django_user_repository import DjangoUserRepository
-from service.application.use_cases.login_user import LoginUser
+from rest_framework_simplejwt.tokens import RefreshToken
 from service.interface_adapters.presenters.login_presenter import LoginPresenter
 
 
@@ -34,14 +32,14 @@ class LoginController(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        user_repository = DjangoUserRepository()
-        use_case = LoginUser(user_repository)
+        # Authenticate the user using Django's authenticate function.
+        user = authenticate(username=email, password=password)
+        if not user:
+            raise AuthenticationFailed("Invalid credentials")
 
-        try:
-            # In this JWT approach, the use case returns a dict with refresh and access tokens.
-            token_data = use_case.execute(email, password)
-        except Exception as e:
-            raise AuthenticationFailed(str(e)) from e
+        # Generate JWT tokens using the SimpleJWT refresh mechanism.
+        refresh = RefreshToken.for_user(user)
+        token_data = {"access": str(refresh.access_token), "refresh": str(refresh)}
 
         presenter = LoginPresenter()
         return presenter.present(token_data)

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "service",
+    "authentication",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
 ]
@@ -64,6 +65,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
+    "USER_ID_FIELD": "user_id",
+    "USER_ID_CLAIM": "user_id",
 }
 
 MIDDLEWARE = [
@@ -116,6 +119,8 @@ DATABASES = {
         },
     }
 }
+
+AUTH_USER_MODEL = "authentication.User"
 
 
 # Password validation

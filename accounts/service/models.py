@@ -1,4 +1,4 @@
-# accounts\service\views.py
+# accounts\service\models.py
 
 """Account model for managing user account data in the microblogging application."""
 

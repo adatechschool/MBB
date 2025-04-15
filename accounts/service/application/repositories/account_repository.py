@@ -28,7 +28,7 @@ class AccountRepositoryInterface(ABC):
         username: str,
         email: str,
         bio: str,
-        profile_picture: Optional[bytes],
+        profile_picture: Optional[str],
     ) -> AccountEntity:
         """Update an account with the given information.
 

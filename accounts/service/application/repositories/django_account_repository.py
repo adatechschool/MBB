@@ -2,6 +2,8 @@
 
 """Django implementation of the account repository interface."""
 
+import base64
+import re  # noqa: F401
 from typing import Optional
 from service.application.repositories.account_repository import (
     AccountRepositoryInterface,
@@ -34,14 +36,22 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         username: str,
         email: str,
         bio: str,
-        profile_picture: Optional[bytes],
+        profile_picture: Optional[str],
     ) -> AccountEntity:
         acc = Account.objects.get(user_id=user_id)
         acc.username = username
         acc.email = email
         acc.bio = bio
         if profile_picture is not None:
-            acc.profile_picture = profile_picture
+            # Check if profile_picture is a base64 encoded string
+            if profile_picture.startswith("data:"):
+                # Remove header if present (e.g., "data:image/png;base64,")
+                header, encoded = profile_picture.split(",", 1)
+                decoded_picture = base64.b64decode(encoded)
+            else:
+                # If it's a plain string, try encoding it to bytes
+                decoded_picture = profile_picture.encode("utf-8")
+            acc.profile_picture = decoded_picture
         acc.save()
         return AccountEntity(
             user_id=acc.user_id,

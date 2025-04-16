@@ -24,7 +24,7 @@ class SessionController(APIView):
 
     Endpoints:
       - POST /api/sessions/add/ : Create a new session.
-      - GET  /api/sessions/ or /api/sessions/current/ : Get current session via Bearer token.
+      - GET  /api/sessions/current/ : Get current session via Bearer token.
       - GET  /api/sessions/<int:session_id>/ : Retrieve a session by its ID.
       - DELETE /api/sessions/<int:session_id>/ : Delete a session.
     """

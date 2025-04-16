@@ -1,5 +1,7 @@
 # accounts\service\views.py
 
+"""URL configuration for account service endpoints."""
+
 from django.urls import path
 from service.interface_adapters.controllers.account_controller import AccountController
 

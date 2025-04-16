@@ -11,6 +11,8 @@ from service.interface_adapters.controllers.refresh_token_controller import (
 urlpatterns = [
     path("add/", SessionController.as_view(), name="session_create"),
     path("current/", SessionController.as_view(), name="session_create_or_current"),
-    path("<int:session_id>/", SessionController.as_view(), name="session_detail"),
+    path(
+        "delete/<int:session_id>/", SessionController.as_view(), name="session_detail"
+    ),
     path("refresh/", RefreshTokenController.as_view(), name="token_refresh"),
 ]

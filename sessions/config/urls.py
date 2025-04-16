@@ -17,25 +17,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.contrib import admin
 from django.urls import path, include  # noqa
-from service.interface_adapters.controllers.refresh_token_controller import (
-    RefreshTokenController,
-)
-from service.interface_adapters.controllers.session_controller import SessionController
+
 
 urlpatterns = [
-    path("api/sessions/add/", SessionController.as_view(), name="session_create"),
-    path(
-        "api/sessions/current/",
-        SessionController.as_view(),
-        name="session_create_or_current",
-    ),
-    path(
-        "api/sessions/refresh/", RefreshTokenController.as_view(), name="token_refresh"
-    ),
-    path(
-        "api/sessions/<int:session_id>/",
-        SessionController.as_view(),
-        name="session_detail",
-    ),
+    path("admin/", admin.site.urls),
+    path("api/sessions/", include("service.views")),
 ]

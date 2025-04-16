@@ -3,6 +3,7 @@
 """Controller module for handling user authentication and login functionality."""
 
 from datetime import datetime
+import pytz
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -15,7 +16,6 @@ from service.application.repositories.django_session_repository import (
 )
 from service.application.use_cases.create_session import CreateSession
 from service.interface_adapters.presenters.login_presenter import LoginPresenter
-import pytz
 
 
 class LoginController(APIView):
@@ -55,4 +55,6 @@ class LoginController(APIView):
 
         token_data = {"access": access_token, "refresh": refresh_token}
         presenter = LoginPresenter()
-        return presenter.present(token_data)
+        return presenter.present(
+            token_data, expires_at
+        )  # pylint: disable=too-many-function-args

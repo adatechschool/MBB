@@ -5,6 +5,7 @@
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from service.application.repositories.django_account_repository import (
     DjangoAccountRepository,
 )
@@ -19,6 +20,8 @@ USER_ID_REQUIRED = "User ID is required."
 class AccountController(APIView):
     """Controller class that handles HTTP requests and responses for account-related operations."""
 
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, user_id=None):
         """Handle GET request to retrieve an account by user ID.
 
@@ -30,9 +33,8 @@ class AccountController(APIView):
             Response object containing the account data or error message
         """
         if user_id is None:
-            return Response(
-                {"error": USER_ID_REQUIRED}, status=status.HTTP_400_BAD_REQUEST
-            )
+            user_id = request.user.id
+
         repository = DjangoAccountRepository()
         use_case = GetAccount(repository)
         try:
@@ -53,9 +55,7 @@ class AccountController(APIView):
             Response object containing the updated account data or error message
         """
         if user_id is None:
-            return Response(
-                {"error": USER_ID_REQUIRED}, status=status.HTTP_400_BAD_REQUEST
-            )
+            user_id = request.user.id
         username = request.data.get("username")
         email = request.data.get("email")
         bio = request.data.get("bio", "")

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 class LoginPresenter:
     """Presenter class responsible for formatting login response data into HTTP responses."""
 
-    def present(self, token_data):
+    def present(self, token_data, expires_at):
         """Format successful login data into an HTTP response.
 
         Args:
@@ -17,7 +17,18 @@ class LoginPresenter:
         Returns:
             Response: HTTP response with token data and 200 status code.
         """
-        return Response(token_data, status=200)
+        response = Response(
+            {"message": "Login successful", "access": token_data["access"]}, status=200
+        )
+        response.set_cookie(
+            key="refreshToken",
+            value=token_data["refresh"],
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            expires=expires_at,
+        )
+        return response
 
     def present_error(self, error_message):
         """Format login error into an HTTP response.

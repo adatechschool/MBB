@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
+    "corsheaders",
 ]
 
 X_FRAME_OPTIONS = "SAMEORIGIN"

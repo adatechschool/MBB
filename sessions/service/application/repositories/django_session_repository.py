@@ -89,8 +89,13 @@ class DjangoSessionRepository(SessionRepositoryInterface):
         """
         Session.objects.filter(session_id=session_id).delete()
 
-    # Add inside DjangoSessionRepository:
     def delete_session_by_token(self, token: str) -> None:
-        from service.models import Session  # ensure the Session model is imported
+        """Deletes a session from the database by its token.
 
+        Args:
+            token (str): The token of the session to delete
+
+        Returns:
+            None
+        """
         Session.objects.filter(token=token).delete()

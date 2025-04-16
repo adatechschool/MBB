@@ -44,7 +44,6 @@ class AccountEntity:
             "user_id": self.user_id,
             "username": self.username,
             "email": self.email,
-            # Depending on your use case, you might encode binary data (e.g. base64)
             "profile_picture": base64.b64encode(self.profile_picture).decode("utf-8")
             if self.profile_picture
             else None,

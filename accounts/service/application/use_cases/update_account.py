@@ -2,6 +2,7 @@
 
 """Module containing the UpdateAccount use case for managing account updates."""
 
+from typing import Optional
 from service.application.repositories.account_repository import (
     AccountRepositoryInterface,
 )
@@ -18,7 +19,12 @@ class UpdateAccount:
         self.account_repository = account_repository
 
     def execute(
-        self, user_id: int, username: str, email: str, bio: str, profile_picture: bytes
+        self,
+        user_id: int,
+        username: str,
+        email: str,
+        bio: str,
+        profile_picture: Optional[str],
     ):
         """Update an existing account with new information.
 

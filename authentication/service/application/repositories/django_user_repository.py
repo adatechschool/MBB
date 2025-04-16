@@ -5,7 +5,7 @@
 from typing import Optional
 from service.application.repositories.user_repository import UserRepositoryInterface
 from service.core.entities.user import UserEntity
-from users.models import User  # This is your custom user model
+from users.models import User
 
 
 class DjangoUserRepository(UserRepositoryInterface):

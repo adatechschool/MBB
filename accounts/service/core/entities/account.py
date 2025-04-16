@@ -5,6 +5,7 @@ Module containing the Account entity class that represents a user account in the
 This module defines the core data structure for managing user account information.
 """
 
+import base64
 from datetime import datetime
 from typing import Optional
 
@@ -44,7 +45,7 @@ class AccountEntity:
             "username": self.username,
             "email": self.email,
             # Depending on your use case, you might encode binary data (e.g. base64)
-            "profile_picture": self.profile_picture.decode()
+            "profile_picture": base64.b64encode(self.profile_picture).decode("utf-8")
             if self.profile_picture
             else None,
             "bio": self.bio,

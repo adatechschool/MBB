@@ -1,5 +1,7 @@
 # authentication/service/models.py
 
+"""Models for the authentication service, handling user sessions and tokens."""
+
 from django.db import models
 from django.conf import settings
 

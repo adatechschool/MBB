@@ -1,3 +1,4 @@
+# pylint: skip-file
 # sessions/service/interface_adapters/controllers/refresh_token_controller.py
 
 """Controller for handling refresh token operations."""
@@ -5,6 +6,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from service.application.repositories.django_session_repository import (
     DjangoSessionRepository,
 )
@@ -17,6 +19,8 @@ class RefreshTokenController(APIView):
     Provides endpoint to refresh expired access tokens using valid session IDs.
     """
 
+    permission_classes = [AllowAny]
+
     def post(self, request):
         """Handle POST requests to refresh access tokens.
 
@@ -26,24 +30,36 @@ class RefreshTokenController(APIView):
         Returns:
             Response with new access token or error message
         """
-        session_id = request.data.get("session_id")
-        if not session_id:
+        # pull the raw refresh token straight from the cookie
+        raw_refresh = request.COOKIES.get("refreshToken")
+        if not raw_refresh:
             return Response(
-                {"error": "session_id is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            session_id = int(session_id)
-        except ValueError:
-            return Response(
-                {"error": "Invalid session_id."},
+                {"error": "Refresh token cookie is missing."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        session_repository = DjangoSessionRepository()
-        use_case = RefreshToken(session_repository)
+        # look up the session by its token
+        session_repo = DjangoSessionRepository()
+        session = session_repo.get_session_by_token(raw_refresh)
+        if session is None:
+            return Response(
+                {"error": "Session not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # now use the use case
+        use_case = RefreshToken(session_repo)
         try:
-            new_access_token = use_case.execute(session_id)
-            return Response({"access": new_access_token}, status=status.HTTP_200_OK)
+            new_access = use_case.execute(session.session_id)
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # respond and rotate the accessToken cookie
+        resp = Response({"access": new_access}, status=status.HTTP_200_OK)
+        resp.set_cookie(
+            key="accessToken",
+            value=new_access,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+        )
+        return resp

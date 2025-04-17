@@ -4,8 +4,8 @@
 
 from django.urls import path
 from service.interface_adapters.controllers.session_controller import SessionController
-from service.interface_adapters.controllers.refresh_token_controller import (
-    RefreshTokenController,
+from service.interface_adapters.controllers.session_controller import (
+    CookieTokenRefreshView,
 )
 
 urlpatterns = [
@@ -14,5 +14,5 @@ urlpatterns = [
     path(
         "delete/<int:session_id>/", SessionController.as_view(), name="session_detail"
     ),
-    path("refresh/", RefreshTokenController.as_view(), name="token_refresh"),
+    path("refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
 ]

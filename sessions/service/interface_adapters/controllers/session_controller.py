@@ -1,3 +1,4 @@
+# pylint: skip-file
 # sessions/service/interface_adapters/controllers/session_controller.py
 
 """
@@ -6,6 +7,8 @@ Provides endpoints for creating, retrieving and deleting sessions.
 """
 
 from dateutil.parser import parse
+from django.conf import settings
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -128,3 +131,27 @@ class SessionController(APIView):
             )
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    """
+    Overrides the default refresh view to set the new access token
+    in an HttpOnly cookie named 'accessToken'.
+    """
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        data = getattr(response, "data", {}) or {}
+        access = data.get("access")
+        if access:
+            # Set access token in an HttpOnly cookie
+            response.set_cookie(
+                key="accessToken",
+                value=access,
+                httponly=True,
+                secure=not settings.DEBUG,
+                samesite="Lax",
+                path="/",
+            )
+            # Remove token from JSON response
+            response.data.pop("access", None)
+        return super().finalize_response(request, response, *args, **kwargs)

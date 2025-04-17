@@ -10,6 +10,6 @@ from service.interface_adapters.controllers.session_controller import (
 
 urlpatterns = [
     path("add/", SessionController.as_view(), name="session_create"),
-    path("current/", SessionController.as_view(), name="session_create_or_current"),
+    path("current/", SessionController.as_view(), name="session_current"),
     path("refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
 ]

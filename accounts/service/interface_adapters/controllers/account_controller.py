@@ -55,7 +55,7 @@ class AccountController(APIView):
             Response object containing the updated account data or error message
         """
         if user_id is None:
-            user_id = request.user.id
+            user_id = request.user.user_id
         username = request.data.get("username")
         email = request.data.get("email")
         bio = request.data.get("bio", "")

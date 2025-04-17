@@ -75,22 +75,27 @@ class AccountController(APIView):
         """Delete a user account.
 
         Args:
-            request: The HTTP request object
-            user_id: The ID of the user whose account to delete
+            request: HTTP request object
+            user_id: Optional user_id, if none provided, use authenticated user's ID.
 
         Returns:
-            Response object with success message or error message
+            Response: HTTP response indicating deletion status
         """
-        if user_id is None:
-            return Response(
-                {"error": USER_ID_REQUIRED}, status=status.HTTP_400_BAD_REQUEST
-            )
+        user_id = user_id or request.user.user_id
+
         repository = DjangoAccountRepository()
         use_case = DeleteAccount(repository)
+
         try:
             use_case.execute(user_id)
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
-        return Response(
+
+        response = Response(
             {"message": "Account deleted successfully."}, status=status.HTTP_200_OK
         )
+
+        response.delete_cookie("accessToken", path="/")
+        response.delete_cookie("refreshToken", path="/")
+
+        return response

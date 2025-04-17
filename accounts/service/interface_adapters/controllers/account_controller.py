@@ -33,7 +33,7 @@ class AccountController(APIView):
             Response object containing the account data or error message
         """
         if user_id is None:
-            user_id = request.user.id
+            user_id = request.user.user_id
 
         repository = DjangoAccountRepository()
         use_case = GetAccount(repository)

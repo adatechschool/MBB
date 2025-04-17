@@ -2,6 +2,7 @@
 
 """This module defines the LoginPresenter class for handling login response presentation."""
 
+from django.conf import settings
 from rest_framework.response import Response
 
 
@@ -21,12 +22,19 @@ class LoginPresenter:
             {"message": "Login successful", "access": token_data["access"]}, status=200
         )
         response.set_cookie(
-            key="refreshToken",
-            value=token_data["refresh"],
+            "accessToken",
+            token_data["access"],
             httponly=True,
-            secure=False,
+            secure=not settings.DEBUG,
             samesite="Lax",
             expires=expires_at,
+        )
+        response.set_cookie(
+            "refreshToken",
+            token_data["refresh"],
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite="Lax",
         )
         return response
 

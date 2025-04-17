@@ -2,8 +2,8 @@
 
 """Controller module for handling user authentication and login functionality."""
 
-from datetime import datetime
-import pytz
+from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -47,7 +47,8 @@ class LoginController(APIView):
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
-        expires_at = datetime.fromtimestamp(refresh["exp"], tz=pytz.UTC)
+        access_lifetime = timedelta(minutes=10)
+        expires_at = timezone.now() + access_lifetime
 
         session_repository = DjangoSessionRepository()
         create_session = CreateSession(session_repository)
@@ -55,6 +56,4 @@ class LoginController(APIView):
 
         token_data = {"access": access_token, "refresh": refresh_token}
         presenter = LoginPresenter()
-        return presenter.present(
-            token_data, expires_at
-        )  # pylint: disable=too-many-function-args
+        return presenter.present(token_data, expires_at)

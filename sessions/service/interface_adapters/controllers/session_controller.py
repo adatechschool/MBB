@@ -9,6 +9,8 @@ Provides endpoints for creating, retrieving and deleting sessions.
 from dateutil.parser import parse
 from django.conf import settings
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -82,7 +84,6 @@ class SessionController(APIView):
         session_repository = DjangoSessionRepository()
         presenter = SessionPresenter()
 
-        # If a session_id is provided in the URL, retrieve that specific session
         if session_id is not None:
             use_case = GetSession(session_repository)
             try:
@@ -91,7 +92,6 @@ class SessionController(APIView):
             except ValueError as e:
                 return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
         else:
-            # Otherwise, attempt to get the current session using the Bearer token from the header
             auth_header = request.META.get("HTTP_AUTHORIZATION", "")
             if auth_header.startswith("Bearer "):
                 token = auth_header.split("Bearer ")[1]
@@ -133,17 +133,23 @@ class SessionController(APIView):
             return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
 
 
+class CookieTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        request = self.context["request"]
+        refresh_token = request.COOKIES.get("refreshToken")
+        if refresh_token is None:
+            raise ValidationError({"refresh": "No refresh token provided in cookie."})
+        attrs["refresh"] = refresh_token
+        return super().validate(attrs)
+
+
 class CookieTokenRefreshView(TokenRefreshView):
-    """
-    Overrides the default refresh view to set the new access token
-    in an HttpOnly cookie named 'accessToken'.
-    """
+    serializer_class = CookieTokenRefreshSerializer  # type: ignore[assignment]
 
     def finalize_response(self, request, response, *args, **kwargs):
         data = getattr(response, "data", {}) or {}
         access = data.get("access")
         if access:
-            # Set access token in an HttpOnly cookie
             response.set_cookie(
                 key="accessToken",
                 value=access,
@@ -152,6 +158,5 @@ class CookieTokenRefreshView(TokenRefreshView):
                 samesite="Lax",
                 path="/",
             )
-            # Remove token from JSON response
             response.data.pop("access", None)
         return super().finalize_response(request, response, *args, **kwargs)

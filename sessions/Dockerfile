@@ -1,20 +1,36 @@
 # sessions/Dockerfile
 
-FROM python:3.12-slim
+FROM python:3.13-alpine AS builder
 
 ENV PYTHONUNBUFFERED=1
-
 WORKDIR /app
 
-# If sessions shares the same requirements file as authentication, reuse it.
-# Otherwise adjust as needed.
-COPY ../requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    musl-dev
 
-COPY . /app/
+COPY ../requirements.txt .
+RUN pip install --upgrade pip \
+    && pip wheel --no-cache-dir -w /wheels -r requirements.txt
 
-# Expose a different port (or you can use the same if running on different hosts)
+FROM python:3.13-alpine
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+RUN apk add --no-cache \
+    libpq
+
+COPY --from=builder /wheels /wheels
+COPY ../requirements.txt .
+RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+    && rm -rf /wheels
+
+COPY . .
+
+RUN addgroup -S app && adduser -S app -G app
+USER app
+
 EXPOSE 8001
-
-# Run gunicorn with the sessions service WSGI entry point.
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8001"]

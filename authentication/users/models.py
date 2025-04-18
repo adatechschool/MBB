@@ -1,5 +1,7 @@
 # authentication\users\models.py
 
+"""Custom user model and manager for the authentication system."""
+
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,

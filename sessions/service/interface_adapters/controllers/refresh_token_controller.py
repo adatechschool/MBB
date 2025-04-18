@@ -7,10 +7,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from service.application.repositories.django_session_repository import (
-    DjangoSessionRepository,
-)
 from service.application.use_cases.refresh_token import RefreshToken
+from microblog_common.session_repository import DjangoSessionRepository
 
 
 class RefreshTokenController(APIView):

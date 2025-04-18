@@ -1,0 +1,14 @@
+[project]
+name = "microblog-common"
+version = "0.1.0"
+description = "Shared models and repositories for Microblog backend"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "django>=5.2,<6.0",
+  "djangorestframework-simplejwt>=5.2",
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

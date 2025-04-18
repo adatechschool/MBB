@@ -1,4 +1,4 @@
-# accounts\service\interface_adapters\presenters\account_presenter.py
+# accounts\service\interface_adapters\presenters.py
 
 """Presenter class for handling account-related API responses."""
 

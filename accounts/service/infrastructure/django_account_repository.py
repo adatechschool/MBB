@@ -1,18 +1,14 @@
-# accounts\service\application\repositories\django_account_repository.py
-
-"""Django implementation of the account repository interface."""
+# accounts/service/infrastructure/django_account_repository.py
 
 import base64
 from typing import Optional
-from service.application.repositories.account_repository import (
-    AccountRepositoryInterface,
-)
-from accounts.service.core.entities.account import AccountEntity
+from accounts.service.application.repositories import AccountRepositoryInterface
+from accounts.service.core.entities import AccountEntity
 from accounts.service.models import Account
 
 
 class DjangoAccountRepository(AccountRepositoryInterface):
-    """Django implementation of the Account repository for database operations."""
+    """Django ORM implementation of AccountRepositoryInterface"""
 
     def get_account(self, user_id: int) -> Optional[AccountEntity]:
         try:
@@ -42,12 +38,13 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         acc.email = email
         acc.bio = bio
         if profile_picture is not None:
+            # support base64 data URLs or raw string
             if profile_picture.startswith("data:"):
                 _, encoded = profile_picture.split(",", 1)
-                decoded_picture = base64.b64decode(encoded)
+                decoded = base64.b64decode(encoded)
             else:
-                decoded_picture = profile_picture.encode("utf-8")
-            acc.profile_picture = decoded_picture
+                decoded = profile_picture.encode("utf-8")
+            acc.profile_picture = decoded
         acc.save()
         return AccountEntity(
             user_id=acc.user_id,

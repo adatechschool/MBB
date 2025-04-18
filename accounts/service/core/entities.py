@@ -1,9 +1,4 @@
-# accounts\service\core\entities\account.py
-
-"""
-Module containing the Account entity class that represents a user account in the system.
-This module defines the core data structure for managing user account information.
-"""
+# accounts\service\core\entities.py
 
 import base64
 from datetime import datetime

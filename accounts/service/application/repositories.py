@@ -1,10 +1,10 @@
-# accounts\service\application\repositories\account_repository.py
+# accounts\service\application\repositories.py
 
 """Repository interface for account management operations."""
 
 from abc import ABC, abstractmethod
 from typing import Optional
-from accounts.service.core.entities.account import AccountEntity
+from accounts.service.core.entities import AccountEntity
 
 
 class AccountRepositoryInterface(ABC):

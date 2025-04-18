@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "authentication.service.apps.AuthenticationServiceConfig",
     "sessions.service.apps.SessionsServiceConfig",
-    "users.apps.UsersConfig",
+    "users.service.apps.UsersServiceConfig",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
@@ -127,7 +127,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "users.CustomUser"
+AUTH_USER_MODEL = "users_service.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

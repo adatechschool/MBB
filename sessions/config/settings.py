@@ -125,7 +125,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "users.CustomUser"
+AUTH_USER_MODEL = "users_service.User"
 
 
 # Password validation

@@ -20,11 +20,5 @@ class Session(models.Model):
     created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
     expires_at: models.DateTimeField = models.DateTimeField()
 
-    class Meta:
-        """Metadata options for the Session model."""
-
-        db_table = "Session"
-        ordering = ["-created_at"]
-
     def __str__(self):
         return f"Session {self.session_id} for {self.user}"

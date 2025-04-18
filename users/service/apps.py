@@ -1,6 +1,10 @@
+# users\service\apps.py
+
+"""Django app configuration for the users service."""
+
 from django.apps import AppConfig
 
 
 class ServiceConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "service"
+    name = "users.service"
+    label = "users_service"

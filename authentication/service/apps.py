@@ -8,5 +8,5 @@ from django.apps import AppConfig
 class ServiceConfig(AppConfig):
     """Django app configuration for the authentication service."""
 
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "service"
+    name = "authentication.service"
+    label = "authentication_service"

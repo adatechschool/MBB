@@ -7,8 +7,8 @@ from typing import Optional
 from service.application.repositories.session_repository import (
     SessionRepositoryInterface,
 )
-from service.core.entities.session import SessionEntity
-from service.models import Session
+from sessions.service.core.entities.session import SessionEntity
+from sessions.service.models import Session
 
 
 class DjangoSessionRepository(SessionRepositoryInterface):

@@ -1,20 +1,24 @@
-# accounts\service\models.py
+# accounts/service/models.py
 
-"""Account model for managing user account data in the microblogging application."""
+"""Django ORM model for user accounts."""
 
 from django.db import models
 
 
-class Account(models.Model):
-    """Model representing a user account with profile information and metadata."""
+class AccountModel(models.Model):
+    """Model representing a user account in the system."""
 
-    user_id: models.AutoField = models.AutoField(primary_key=True)
-    username: models.CharField = models.CharField(max_length=255)
-    email: models.EmailField = models.EmailField(unique=True)
-    profile_picture: models.BinaryField = models.BinaryField(null=True, blank=True)
-    bio: models.TextField = models.TextField(null=True, blank=True)
-    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
-    updated_at: models.DateTimeField = models.DateTimeField(auto_now=True)
+    user_id = models.IntegerField(primary_key=True)
+    username = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255, unique=True)
+    role_id = models.IntegerField()
+    password = models.CharField(max_length=255)
+    created_at = models.DateTimeField()
+    profile_picture = models.BinaryField(null=True, blank=True)
+    bio = models.TextField(blank=True)
+    updated_at = models.DateTimeField(null=True, blank=True)
 
-    def __str__(self):
-        return str(self.username)
+    class Meta:
+        """Model representing a user account in the system."""
+
+        db_table = '"User"'

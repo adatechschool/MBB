@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional
+
 from accounts.service.core.entities import AccountEntity
 
 

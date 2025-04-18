@@ -1,81 +1,72 @@
 # accounts/service/interface_adapters/controllers.py
 
-"""Controller for handling account-related HTTP requests and responses."""
+"""Controller for account-related HTTP requests and responses."""
 
 from rest_framework.views import APIView
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from accounts.service.application.use_cases import (
-    GetAccount,
-    UpdateAccount,
-    DeleteAccount,
-)
+from accounts.service.application.use_cases import AccountUseCase
 from accounts.service.infrastructure.django_account_repository import (
     DjangoAccountRepository,
 )
-from accounts.service.interface_adapters.presenters import AccountPresenter
-
-
-USER_ID_REQUIRED = "User ID is required."
+from accounts.service.interface_adapters.presenters import Presenter
+from accounts.service.models import AccountModel
 
 
 class AccountController(APIView):
-    """Controller class that handles HTTP requests and responses for account-related operations."""
+    """Controller for account endpoints."""
 
     permission_classes = [IsAuthenticated]
-    repository = DjangoAccountRepository()
+    use_case = AccountUseCase(DjangoAccountRepository())
+    presenter = Presenter()
 
-    def get(self, request, user_id=None):
-        """Handle GET request to retrieve an account by user ID."""
-        user_id = user_id or request.user.user_id
+    def get(self, request):
+        """Retrieve account information for the authenticated user.
 
-        use_case = GetAccount(self.repository)
+        Args:
+            request: HTTP request object containing user authentication.
+
+        Returns:
+            Response object with account data or not found error.
+        """
+        user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
+        entity = self.use_case.get_account(user_id)
+        if not entity:
+            return self.presenter.present_not_found()
+        return self.presenter.present_account(entity)
+
+    def put(self, request):
+        """Update account information for the authenticated user.
+
+        Args:
+            request: HTTP request object containing user authentication and update data.
+
+        Returns:
+            Response object with updated account data or not found error.
+        """
+        user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
+        data = request.data
         try:
-            account = use_case.execute(user_id)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
-
-        presenter = AccountPresenter()
-        return presenter.present(account)
-
-    def put(self, request, user_id=None):
-        """Handle PUT request to update an existing account."""
-        user_id = user_id or request.user.user_id
-        username = request.data.get("username")
-        email = request.data.get("email")
-        bio = request.data.get("bio", "")
-        profile_picture = request.data.get("profile_picture")
-
-        if not username or not email:
-            return Response(
-                {"error": "Username and email are required."},
-                status=status.HTTP_400_BAD_REQUEST,
+            updated = self.use_case.update_account(
+                user_id,
+                data.get("username"),
+                data.get("email"),
+                data.get("bio"),
+                data.get("profile_picture"),
             )
+        except AccountModel.DoesNotExist:
+            return self.presenter.present_not_found()
+        return self.presenter.present_account(updated)
 
-        use_case = UpdateAccount(self.repository)
-        account = use_case.execute(user_id, username, email, bio, profile_picture)
+    def delete(self, request):
+        """Delete account for the authenticated user.
 
-        presenter = AccountPresenter()
-        return presenter.present(account)
+        Args:
+            request: HTTP request object containing user authentication.
 
-    def delete(self, request, user_id=None):
-        """Delete a user account."""
-        user_id = user_id or request.user.user_id
-
-        use_case = DeleteAccount(self.repository)
-        try:
-            use_case.execute(user_id)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
-
-        response = Response(
-            {"message": "Account deleted successfully."},
-            status=status.HTTP_200_OK,
-        )
-        # Also clear authentication cookies
-        response.delete_cookie("accessToken", path="/")
-        response.delete_cookie("refreshToken", path="/")
-
-        return response
+        Returns:
+            Response object confirming account deletion.
+        """
+        user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
+        self.use_case.delete_account(user_id)
+        return self.presenter.present_deleted()

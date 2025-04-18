@@ -1,29 +1,36 @@
 # accounts/service/infrastructure/django_account_repository.py
 
+"""Django ORM implementation of the account repository interface."""
+
 import base64
 from typing import Optional
+from django.utils import timezone
+
 from accounts.service.application.repositories import AccountRepositoryInterface
 from accounts.service.core.entities import AccountEntity
-from accounts.service.models import Account
+from accounts.service.models import AccountModel
 
 
 class DjangoAccountRepository(AccountRepositoryInterface):
-    """Django ORM implementation of AccountRepositoryInterface"""
+    """Django ORM implementation of the account repository interface."""
 
     def get_account(self, user_id: int) -> Optional[AccountEntity]:
         try:
-            acc = Account.objects.get(user_id=user_id)
-            return AccountEntity(
-                user_id=acc.user_id,
-                username=acc.username,
-                email=acc.email,
-                profile_picture=acc.profile_picture,
-                bio=acc.bio,
-                created_at=acc.created_at,
-                updated_at=acc.updated_at,
-            )
-        except Account.DoesNotExist:
+            user = AccountModel.objects.get(user_id=user_id)
+        except AccountModel.DoesNotExist:
             return None
+        picture_b64 = None
+        if user.profile_picture:
+            picture_b64 = base64.b64encode(user.profile_picture).decode()
+        return AccountEntity(
+            user_id=user.user_id,
+            username=user.username,
+            email=user.email,
+            bio=user.bio,
+            profile_picture=picture_b64,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
 
     def update_account(
         self,
@@ -33,28 +40,18 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         bio: str,
         profile_picture: Optional[str],
     ) -> AccountEntity:
-        acc = Account.objects.get(user_id=user_id)
-        acc.username = username
-        acc.email = email
-        acc.bio = bio
+        user = AccountModel.objects.get(user_id=user_id)
+        user.username = username
+        user.email = email
+        user.bio = bio
+        # decode incoming base64 if provided
         if profile_picture is not None:
-            # support base64 data URLs or raw string
-            if profile_picture.startswith("data:"):
-                _, encoded = profile_picture.split(",", 1)
-                decoded = base64.b64decode(encoded)
-            else:
-                decoded = profile_picture.encode("utf-8")
-            acc.profile_picture = decoded
-        acc.save()
-        return AccountEntity(
-            user_id=acc.user_id,
-            username=acc.username,
-            email=acc.email,
-            profile_picture=acc.profile_picture,
-            bio=acc.bio,
-            created_at=acc.created_at,
-            updated_at=acc.updated_at,
+            user.profile_picture = base64.b64decode(profile_picture)
+        user.updated_at = timezone.now()
+        user.save(
+            update_fields=["username", "email", "bio", "profile_picture", "updated_at"]
         )
+        return self.get_account(user_id)  # reuse get to build entity
 
     def delete_account(self, user_id: int) -> None:
-        Account.objects.filter(user_id=user_id).delete()
+        AccountModel.objects.filter(user_id=user_id).delete()

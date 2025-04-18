@@ -7,8 +7,8 @@ WORKDIR /app
 
 RUN apk add --no-cache \
     build-base \
-    postgresql-dev \
-    musl-dev
+    musl-dev \
+    postgresql-dev
 
 COPY ../requirements.txt .
 RUN pip install --upgrade pip \

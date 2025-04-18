@@ -1,4 +1,4 @@
-# microblog_common/session_repository.py
+# common\service\application\repositories\django_session_repository.py
 
 """
 Repository implementation for managing user sessions using Django's session framework.

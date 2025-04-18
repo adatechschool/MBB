@@ -11,9 +11,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from service.application.use_cases.create_session import CreateSession
-from service.interface_adapters.presenters.login_presenter import LoginPresenter
-from microblog_common.session_repository import DjangoSessionRepository
+from authentication.service.application.use_cases.create_session import CreateSession
+from authentication.service.interface_adapters.presenters.login_presenter import (
+    LoginPresenter,
+)
+from common.service.application.repositories.django_session_repository import (
+    DjangoSessionRepository,
+)
 
 
 class LoginController(APIView):

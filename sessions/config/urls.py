@@ -18,7 +18,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include  # noqa
+from django.urls import include, path  # noqa
 
 
 urlpatterns = [

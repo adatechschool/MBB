@@ -5,8 +5,10 @@ Module containing the use case for registering new users in the authentication s
 This module provides functionality to create new user accounts while ensuring email uniqueness.
 """
 
-from service.application.repositories.user_repository import UserRepositoryInterface
-from service.core.entities.user import UserEntity
+from users.service.application.repositories.user_repository import (
+    UserRepositoryInterface,
+)
+from users.service.core.entities.user import UserEntity
 
 
 class RegisterUser:

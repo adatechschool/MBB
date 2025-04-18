@@ -1,4 +1,4 @@
-# accounts\service\application\repositories\django_account_repository.py
+# common\service\application\repositories\django_account_repository.py
 
 """Django implementation of the account repository interface."""
 

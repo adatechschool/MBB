@@ -7,9 +7,13 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from service.application.repositories.django_user_repository import DjangoUserRepository
-from service.application.use_cases.register_user import RegisterUser
-from service.interface_adapters.presenters.register_presenter import RegisterPresenter
+from users.service.application.repositories.django_user_repository import (
+    DjangoUserRepository,
+)
+from authentication.service.application.use_cases.register_user import RegisterUser
+from authentication.service.interface_adapters.presenters.register_presenter import (
+    RegisterPresenter,
+)
 
 
 class RegisterController(APIView):

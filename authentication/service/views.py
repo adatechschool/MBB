@@ -7,9 +7,13 @@ login, logout and registration functionality.
 """
 
 from django.urls import path
-from service.interface_adapters.controllers.login_controller import LoginController
-from service.interface_adapters.controllers.logout_controller import LogoutController
-from service.interface_adapters.controllers.register_controller import (
+from authentication.service.interface_adapters.controllers.login_controller import (
+    LoginController,
+)
+from authentication.service.interface_adapters.controllers.logout_controller import (
+    LogoutController,
+)
+from authentication.service.interface_adapters.controllers.register_controller import (
     RegisterController,
 )
 

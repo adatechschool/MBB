@@ -1,11 +1,13 @@
-# authentication/service/application/repositories/django_user_repository.py
+# users\service\application\repositories\django_user_repository.py
 
 """Django implementation of the user repository interface for authentication operations."""
 
 from typing import Optional
-from service.application.repositories.user_repository import UserRepositoryInterface
-from service.core.entities.user import UserEntity
-from users.models import User
+from users.service.application.repositories.user_repository import (
+    UserRepositoryInterface,
+)
+from users.service.core.entities.user import UserEntity
+from users.service.models import User
 
 
 class DjangoUserRepository(UserRepositoryInterface):

@@ -2,7 +2,7 @@
 
 """Module containing the CreateSession use case for managing user sessions."""
 
-from service.application.repositories.session_repository import (
+from sessions.service.application.repositories.session_repository import (
     SessionRepositoryInterface,
 )
 

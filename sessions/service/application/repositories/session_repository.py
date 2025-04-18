@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional
-from service.core.entities.session import SessionEntity
+from sessions.service.core.entities.session import SessionEntity
 
 
 class SessionRepositoryInterface(ABC):

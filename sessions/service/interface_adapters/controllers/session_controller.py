@@ -14,7 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from common.service.application.repositories.django_session_repository import (
+from sessions.service.application.repositories.django_session_repository import (
     DjangoSessionRepository,
 )
 from service.application.use_cases.create_session import CreateSession

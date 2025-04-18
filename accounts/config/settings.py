@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "accounts.service.apps.AccountsServiceConfig",
+    "users.service.apps.UsersServiceConfig",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
@@ -57,7 +58,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "service.authentication.CookieJWTAuthentication",
+        "authentication.service.authentication.CookieJWTAuthentication",
     ),
 }
 

@@ -57,7 +57,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "authentication.service.authentication.CookieJWTAuthentication",
     ),
 }
 

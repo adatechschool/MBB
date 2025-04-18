@@ -1,4 +1,4 @@
-# users\Dockerfile
+# accounts\Dockerfile
 
 FROM python:3.13-alpine AS builder
 
@@ -32,5 +32,5 @@ COPY . .
 RUN addgroup -S app && adduser -S app -G app
 USER app
 
-EXPOSE 8003
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8003"]
+EXPOSE 8004
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8004"]

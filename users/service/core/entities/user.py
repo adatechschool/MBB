@@ -1,4 +1,4 @@
-# authentication/service/core/entities/user.py
+# users\service\core\entities\user.py
 
 """Module containing the User entity class for the authentication service."""
 

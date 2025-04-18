@@ -1,5 +1,7 @@
 # users\service\models.py
 
+"""Models for the users service."""
+
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,

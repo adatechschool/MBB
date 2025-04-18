@@ -1,10 +1,10 @@
-# authentication/service/application/repositories/user_repository.py
+# users\service\application\repositories\user_repository.py
 
 """Repository interface for user-related database operations."""
 
 from typing import Optional
 from abc import ABC, abstractmethod
-from service.core.entities.user import UserEntity
+from users.service.core.entities.user import UserEntity
 
 
 class UserRepositoryInterface(ABC):

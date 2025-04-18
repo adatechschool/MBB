@@ -4,11 +4,11 @@
 
 import base64
 from typing import Optional
-from service.application.repositories.account_repository import (
+from accounts.service.application.repositories.account_repository import (
     AccountRepositoryInterface,
 )
-from service.core.entities.account import AccountEntity
-from service.models import Account
+from accounts.service.core.entities.account import AccountEntity
+from accounts.service.models import Account
 
 
 class DjangoAccountRepository(AccountRepositoryInterface):

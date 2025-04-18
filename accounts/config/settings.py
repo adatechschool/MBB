@@ -1,5 +1,5 @@
-# pylint: skip-file
 # accounts\config\settings.py
+# pylint: skip-file
 
 """
 Django settings for config project.
@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "service",
-    # "users",
     "users.apps.UsersConfig",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",

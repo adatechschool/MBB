@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from service.application.repositories.django_account_repository import (
+from common.service.application.repositories.django_account_repository import (
     DjangoAccountRepository,
 )
 from service.application.use_cases.get_account import GetAccount

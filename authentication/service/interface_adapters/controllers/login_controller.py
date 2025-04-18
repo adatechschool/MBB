@@ -15,7 +15,7 @@ from authentication.service.application.use_cases.create_session import CreateSe
 from authentication.service.interface_adapters.presenters.login_presenter import (
     LoginPresenter,
 )
-from common.service.application.repositories.django_session_repository import (
+from sessions.service.application.repositories.django_session_repository import (
     DjangoSessionRepository,
 )
 

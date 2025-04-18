@@ -5,7 +5,7 @@
 from django.apps import AppConfig
 
 
-class ServiceConfig(AppConfig):
+class AuthenticationServiceConfig(AppConfig):
     """Django app configuration for the authentication service."""
 
     name = "authentication.service"

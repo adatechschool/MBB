@@ -5,7 +5,7 @@
 from django.apps import AppConfig
 
 
-class ServiceConfig(AppConfig):
+class SessionsServiceConfig(AppConfig):
     """Configuration class for the service application."""
 
     name = "sessions.service"

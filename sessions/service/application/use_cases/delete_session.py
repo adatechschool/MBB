@@ -2,7 +2,7 @@
 
 """Use case for deleting a user session."""
 
-from service.application.repositories.session_repository import (
+from sessions.service.application.repositories.session_repository import (
     SessionRepositoryInterface,
 )
 

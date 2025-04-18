@@ -1,5 +1,5 @@
-# pylint: skip-file
 # sessions/service/interface_adapters/controllers/session_controller.py
+# pylint: skip-file
 
 """
 Controller module for handling HTTP requests related to session management.

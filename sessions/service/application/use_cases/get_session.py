@@ -2,7 +2,7 @@
 
 """Use case for retrieving a session by its ID."""
 
-from service.application.repositories.session_repository import (
+from sessions.service.application.repositories.session_repository import (
     SessionRepositoryInterface,
 )
 

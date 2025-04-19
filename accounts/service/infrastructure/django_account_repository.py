@@ -51,7 +51,7 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         user.save(
             update_fields=["username", "email", "bio", "profile_picture", "updated_at"]
         )
-        return self.get_account(user_id)  # reuse get to build entity
+        return self.get_account(user_id)
 
     def delete_account(self, user_id: int) -> None:
         AccountModel.objects.filter(user_id=user_id).delete()

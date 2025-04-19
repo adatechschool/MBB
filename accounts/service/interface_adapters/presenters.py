@@ -2,41 +2,36 @@
 
 """Presenter for formatting account HTTP responses."""
 
-from rest_framework.response import Response
-from rest_framework import status
-
+from common.presenters import BasePresenter
 from accounts.service.core.entities import AccountEntity
 
 
-class Presenter:
-    """Presenter for formatting account HTTP responses."""
+class AccountPresenter(BasePresenter):
+    """Presenter class responsible for formatting account-related HTTP responses."""
 
-    def present_account(self, entity: AccountEntity) -> Response:
-        """Format an account entity into an HTTP response.
+    def present_account(self, entity: AccountEntity):
+        """Format an account entity into a successful HTTP response.
 
         Args:
             entity: The account entity to format
 
         Returns:
-            Response object with account data and 200 status code
+            A formatted HTTP response containing the account data
         """
-        data = entity.to_dict()
-        return Response(data, status=status.HTTP_200_OK)
+        return self.success(entity.to_dict(), http_status=200)
 
-    def present_not_found(self) -> Response:
-        """Format a not found HTTP response.
+    def present_not_found(self):
+        """Format a not found error response.
 
         Returns:
-            Response object with 404 status code and error message
+            A formatted HTTP 404 error response
         """
-        return Response(
-            {"detail": "Account not found."}, status=status.HTTP_404_NOT_FOUND
-        )
+        return self.error("Account not found.", code=404)
 
-    def present_deleted(self) -> Response:
-        """Format a deleted HTTP response.
+    def present_deleted(self):
+        """Format a successful deletion response.
 
         Returns:
-            Response object with 204 status code
+            A formatted HTTP 204 response indicating successful deletion
         """
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.success({}, http_status=204)

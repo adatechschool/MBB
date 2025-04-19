@@ -6,11 +6,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from accounts.service.application.use_cases import AccountUseCase
+from accounts.service.interface_adapters.presenters import AccountPresenter
+from accounts.service.models import AccountModel
 from accounts.service.infrastructure.django_account_repository import (
     DjangoAccountRepository,
 )
-from accounts.service.interface_adapters.presenters import Presenter
-from accounts.service.models import AccountModel
 
 
 class AccountController(APIView):
@@ -18,7 +18,7 @@ class AccountController(APIView):
 
     permission_classes = [IsAuthenticated]
     use_case = AccountUseCase(DjangoAccountRepository())
-    presenter = Presenter()
+    presenter = AccountPresenter()
 
     def get(self, request):
         """Retrieve account information for the authenticated user.

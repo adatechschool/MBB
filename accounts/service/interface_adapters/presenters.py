@@ -35,3 +35,7 @@ class AccountPresenter(BasePresenter):
             A formatted HTTP 204 response indicating successful deletion
         """
         return self.success({}, http_status=204)
+
+    def present_error(self, message: str, code: int = 400):
+        """Format error response with provided message and code."""
+        return self.error(message, code)

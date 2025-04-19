@@ -23,5 +23,5 @@ from django.urls import include, path  # noqa
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/sessions/", include("service.views")),
+    path("api/sessions/", include("sessions.service.views")),
 ]

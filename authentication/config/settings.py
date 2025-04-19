@@ -1,5 +1,4 @@
 # authentication\config\settings.py
-# pylint: skip-file
 
 """
 Django settings for config project.

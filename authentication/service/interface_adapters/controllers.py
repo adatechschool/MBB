@@ -12,6 +12,9 @@ from authentication.service.infrastructure.django_auth_repository import (
     DjangoAuthRepository,
 )
 from authentication.service.interface_adapters.presenters import AuthPresenter
+from accounts.service.client import AccountClient
+from sessions.service.client import SessionClient
+from common.events import publish_event
 
 
 class RegisterController(APIView):
@@ -32,11 +35,12 @@ class RegisterController(APIView):
         """
         data = request.data
         try:
-            self.use_case.register(
+            user_id = self.use_case.register(
                 data.get("username"), data.get("email"), data.get("password")
             )
         except ValueError as exc:
             return self.presenter.present_error(str(exc))
+        AccountClient().create_account(user_id, data.get("username"), data.get("email"))
         return self.presenter.present_register()
 
 
@@ -77,6 +81,7 @@ class LoginController(APIView):
             secure=secure,
             samesite="Lax",
         )
+        SessionClient().create_session(tokens.refresh)
         return response
 
 
@@ -110,4 +115,5 @@ class LogoutController(APIView):
         response = self.presenter.present_logout()
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
+        publish_event("user.logged_out", {"user_id": request.user.user_id})
         return response

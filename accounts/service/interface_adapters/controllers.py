@@ -5,6 +5,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
+from common.events import publish_event
 from accounts.service.application.use_cases import AccountUseCase
 from accounts.service.interface_adapters.presenters import AccountPresenter
 from accounts.service.models import AccountModel
@@ -56,6 +57,8 @@ class AccountController(APIView):
             )
         except AccountModel.DoesNotExist:
             return self.presenter.present_not_found()
+        entity = updated
+        publish_event("account.updated", entity.to_dict())
         return self.presenter.present_account(updated)
 
     def delete(self, request):
@@ -69,4 +72,5 @@ class AccountController(APIView):
         """
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         self.use_case.delete_account(user_id)
+        publish_event("account.deleted", {"user_id": user_id})
         return self.presenter.present_deleted()

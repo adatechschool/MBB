@@ -35,3 +35,7 @@ django-admin-interface
 
 pytz
 types-pytz
+
+kafka-python
+types-requests
+pydantic

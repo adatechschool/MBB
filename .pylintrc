@@ -1,9 +1,0 @@
-; .pylintrc
-
-[FORMAT]
-# You can set a lower minimum for public methods if appropriate
-min-public-methods=1
-
-[MASTER]
-load-plugins=pylint_django
-django-settings-module=config.settings

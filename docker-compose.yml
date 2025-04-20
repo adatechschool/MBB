@@ -24,7 +24,7 @@ services:
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
+      - DJANGO_SETTINGS_MODULE=authentication.config.settings
 
   sessions:
     build:
@@ -38,7 +38,7 @@ services:
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
+      - DJANGO_SETTINGS_MODULE=sessions.config.settings
 
   accounts:
     build:
@@ -52,7 +52,7 @@ services:
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
+      - DJANGO_SETTINGS_MODULE=accounts.config.settings
 
 volumes:
   postgres_data:

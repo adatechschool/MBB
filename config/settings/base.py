@@ -48,6 +48,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "authentication.service.authentication.CookieJWTAuthentication",
     ),
+    "EXCEPTION_HANDLER": "common.exception_handlers.custom_exception_handler",
 }
 
 SIMPLE_JWT = {

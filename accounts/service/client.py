@@ -12,6 +12,7 @@ class AccountClient:
     """HTTP client for interacting with the Accounts microservice."""
 
     BASE_URL = settings.ACCOUNTS_SERVICE_URL.rstrip("/")
+    TIMEOUT = 5
 
     def get_account(self, user_id: int) -> AccountDTO:
         """Retrieve account information for the given user ID.
@@ -28,6 +29,28 @@ class AccountClient:
         resp = requests.get(
             f"{self.BASE_URL}/api/accounts/get/account/",
             params={"user_id": user_id},
+            timeout=self.TIMEOUT,
+        )
+        resp.raise_for_status()
+        data = resp.json()["data"]
+        return AccountDTO(**data)
+
+    def create_account(
+        self,
+        user_id: int,
+        username: str,
+        email: str,
+    ) -> AccountDTO:
+        """Create a new account in the Accounts service."""
+        payload = {
+            "user_id": user_id,
+            "username": username,
+            "email": email,
+        }
+        resp = requests.post(
+            f"{self.BASE_URL}/api/accounts/create/account/",
+            json=payload,
+            timeout=self.TIMEOUT,
         )
         resp.raise_for_status()
         data = resp.json()["data"]
@@ -66,6 +89,7 @@ class AccountClient:
             f"{self.BASE_URL}/api/accounts/update/account/",
             params={"user_id": user_id},
             json=payload,
+            timeout=self.TIMEOUT,
         )
         resp.raise_for_status()
         data = resp.json()["data"]
@@ -83,5 +107,6 @@ class AccountClient:
         resp = requests.delete(
             f"{self.BASE_URL}/api/accounts/delete/account/",
             params={"user_id": user_id},
+            timeout=self.TIMEOUT,
         )
         resp.raise_for_status()

@@ -2,17 +2,24 @@
 
 """Controller for session-related HTTP requests and responses."""
 
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import status
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-from django.conf import settings
 
 from sessions.service.application.use_cases import SessionUseCase
 from sessions.service.infrastructure.django_session_repository import (
     DjangoSessionRepository,
 )
 from sessions.service.interface_adapters.presenters import SessionPresenter
+from sessions.service.exceptions import (
+    SessionCreateError,
+    SessionNotFound,
+    SessionRefreshError,
+)
 
 
 class SessionController(APIView):
@@ -43,8 +50,10 @@ class SessionController(APIView):
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
             entity = self.use_case.create_session(user_id, refresh_token)
-        except ValueError as exc:
-            return self.presenter.present_error(str(exc))
+        except SessionCreateError as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_400_BAD_REQUEST
+            )
         return self.presenter.present_session_created(entity)
 
     def get(self, request):
@@ -57,10 +66,16 @@ class SessionController(APIView):
             Response with list of active sessions for the user.
         """
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
-        entities = self.use_case.get_current_sessions(user_id)
+        try:
+            entities = self.use_case.get_current_sessions(user_id)
+        except SessionNotFound as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_404_NOT_FOUND
+            )
         return self.presenter.present_sessions(entities)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class CookieTokenRefreshView(APIView):
     """Handle token refresh operations using HTTP cookies.
 
@@ -91,14 +106,19 @@ class CookieTokenRefreshView(APIView):
             serializer.is_valid(raise_exception=True)
             access = serializer.validated_data["access"]
             new_refresh = serializer.validated_data.get("refresh")
-            # update session record if token rotated
             if new_refresh:
                 self.use_case.refresh_session(refresh_token, new_refresh)
                 refresh_value = new_refresh
             else:
                 refresh_value = refresh_token
-        except ValueError as exc:
-            return self.presenter.present_error(str(exc))
+        except SessionRefreshError as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_401_UNAUTHORIZED
+            )
         response = self.presenter.present_refresh(access, refresh_value)
         secure = not settings.DEBUG
         response.set_cookie(

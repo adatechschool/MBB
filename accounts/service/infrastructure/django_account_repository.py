@@ -5,10 +5,12 @@
 import base64
 from typing import Optional
 from django.utils import timezone
+from django.db import IntegrityError
 
 from accounts.service.application.repositories import AccountRepositoryInterface
 from accounts.service.core.entities import AccountEntity
 from accounts.service.models import AccountModel
+from accounts.service.exceptions import AccountNotFound, AccountConflict
 
 
 class DjangoAccountRepository(AccountRepositoryInterface):
@@ -17,8 +19,8 @@ class DjangoAccountRepository(AccountRepositoryInterface):
     def get_account(self, user_id: int) -> Optional[AccountEntity]:
         try:
             user = AccountModel.objects.get(user_id=user_id)
-        except AccountModel.DoesNotExist:
-            return None
+        except AccountModel.DoesNotExist as exc:
+            raise AccountNotFound("Account not found.") from exc
         picture_b64 = None
         if user.profile_picture:
             picture_b64 = base64.b64encode(user.profile_picture).decode()
@@ -40,18 +42,32 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         bio: str,
         profile_picture: Optional[str],
     ) -> AccountEntity:
-        user = AccountModel.objects.get(user_id=user_id)
+        try:
+            user = AccountModel.objects.get(user_id=user_id)
+        except AccountModel.DoesNotExist as exc:
+            raise AccountNotFound("Account not found.") from exc
         user.username = username
         user.email = email
         user.bio = bio
-        # decode incoming base64 if provided
         if profile_picture is not None:
             user.profile_picture = base64.b64decode(profile_picture)
         user.updated_at = timezone.now()
-        user.save(
-            update_fields=["username", "email", "bio", "profile_picture", "updated_at"]
-        )
+        try:
+            user.save(
+                update_fields=[
+                    "username",
+                    "email",
+                    "bio",
+                    "profile_picture",
+                    "updated_at",
+                ]
+            )
+        except IntegrityError as exc:
+            raise AccountConflict("Username or email already taken.") from exc
         return self.get_account(user_id)
 
     def delete_account(self, user_id: int) -> None:
-        AccountModel.objects.filter(user_id=user_id).delete()
+        try:
+            AccountModel.objects.filter(user_id=user_id).delete()
+        except AccountModel.DoesNotExist as exc:
+            raise AccountNotFound("Account not found.") from exc

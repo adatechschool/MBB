@@ -1,5 +1,7 @@
 # authentication\service\authentication.py
 
+"""Authentication service module for JWT token handling via cookies."""
+
 from rest_framework.authentication import BaseAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 

@@ -12,7 +12,7 @@ class AuthUseCase:
     def __init__(self, repo: AuthRepositoryInterface):
         self.repo = repo
 
-    def register(self, username: str, email: str, password: str) -> None:
+    def register(self, username: str, email: str, password: str) -> str:
         """Register a new user with the given credentials.
 
         Args:
@@ -21,9 +21,9 @@ class AuthUseCase:
             password (str): The password for the new account
 
         Returns:
-            None
+            str: the newly created user’s ID
         """
-        self.repo.register(username, email, password)
+        return self.repo.register(username, email, password)
 
     def login(self, username: str, password: str) -> AuthTokens:
         """Authenticate a user with the given credentials.

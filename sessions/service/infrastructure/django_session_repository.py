@@ -8,6 +8,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from sessions.service.application.repositories import SessionRepositoryInterface
 from sessions.service.core.entities import SessionEntity
 from sessions.service.models import SessionModel
+from sessions.service.exceptions import (
+    SessionCreateError,
+    SessionNotFound,
+    SessionRefreshError,
+)
 
 
 class DjangoSessionRepository(SessionRepositoryInterface):
@@ -17,11 +22,14 @@ class DjangoSessionRepository(SessionRepositoryInterface):
         token_obj = RefreshToken(refresh_token)
         expires_ts = token_obj["exp"]
         expires_at = datetime.fromtimestamp(expires_ts, tz=dt_timezone.utc)
-        session = SessionModel.objects.create(
-            user_id=user_id,
-            token=refresh_token,
-            expires_at=expires_at,
-        )
+        try:
+            session = SessionModel.objects.create(
+                user_id=user_id,
+                token=refresh_token,
+                expires_at=expires_at,
+            )
+        except Exception as exc:
+            raise SessionCreateError("Session creation failed.") from exc
         return SessionEntity(
             session_id=session.session_id,
             user_id=session.user_id,
@@ -32,6 +40,8 @@ class DjangoSessionRepository(SessionRepositoryInterface):
 
     def get_sessions(self, user_id: int) -> list[SessionEntity]:
         sessions = SessionModel.objects.filter(user_id=user_id)
+        if not sessions:
+            raise SessionNotFound("Session not found.")
         return [
             SessionEntity(
                 session_id=s.session_id,
@@ -52,7 +62,10 @@ class DjangoSessionRepository(SessionRepositoryInterface):
         expires_at = datetime.fromtimestamp(expires_ts, tz=dt_timezone.utc)
         session.token = new_refresh_token
         session.expires_at = expires_at
-        session.save(update_fields=["token", "expires_at"])
+        try:
+            session.save(update_fields=["token", "expires_at"])
+        except Exception as exc:
+            raise SessionRefreshError("Session refresh failed.") from exc
         return SessionEntity(
             session_id=session.session_id,
             user_id=session.user_id,

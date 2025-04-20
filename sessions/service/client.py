@@ -13,6 +13,7 @@ class SessionClient:
     """HTTP client for interacting with the Sessions microservice."""
 
     BASE_URL = settings.SESSIONS_SERVICE_URL.rstrip("/")
+    TIMEOUT = 5
 
     def create_session(self, refresh_token: str) -> SessionDTO:
         """Create a new session using a refresh token.
@@ -29,6 +30,7 @@ class SessionClient:
         resp = requests.post(
             f"{self.BASE_URL}/api/sessions/add/",
             cookies={"refresh_token": refresh_token},
+            timeout=self.TIMEOUT,
         )
         resp.raise_for_status()
         data = resp.json()["data"]
@@ -56,6 +58,7 @@ class SessionClient:
         resp = requests.get(
             f"{self.BASE_URL}/api/sessions/current/",
             params={"user_id": user_id},
+            timeout=self.TIMEOUT,
         )
         resp.raise_for_status()
         arr = resp.json()["data"]
@@ -74,6 +77,7 @@ class SessionClient:
         resp = requests.post(
             f"{self.BASE_URL}/api/sessions/refresh/",
             cookies={"refresh_token": old_refresh},
+            timeout=self.TIMEOUT,
         )
         resp.raise_for_status()
         publish_event(

@@ -2,10 +2,12 @@
 
 """Controller for authentication-related HTTP requests and responses."""
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.conf import settings
 
 from authentication.service.application.use_cases import AuthUseCase
 from authentication.service.infrastructure.django_auth_repository import (
@@ -15,8 +17,14 @@ from authentication.service.interface_adapters.presenters import AuthPresenter
 from accounts.service.client import AccountClient
 from sessions.service.client import SessionClient
 from common.events import publish_event
+from authentication.service.exceptions import (
+    UserAlreadyExists,
+    AuthenticationFailed,
+    TokenBlacklistError,
+)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class RegisterController(APIView):
     """Controller handling user registration requests."""
 
@@ -38,12 +46,13 @@ class RegisterController(APIView):
             user_id = self.use_case.register(
                 data.get("username"), data.get("email"), data.get("password")
             )
-        except ValueError as exc:
-            return self.presenter.present_error(str(exc))
+        except UserAlreadyExists as exc:
+            return self.presenter.present_error(str(exc), code=status.HTTP_409_CONFLICT)
         AccountClient().create_account(user_id, data.get("username"), data.get("email"))
         return self.presenter.present_register()
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LoginController(APIView):
     """Controller handling user login requests."""
 
@@ -63,8 +72,10 @@ class LoginController(APIView):
         data = request.data
         try:
             tokens = self.use_case.login(data.get("username"), data.get("password"))
-        except ValueError:
-            return self.presenter.present_error("Invalid credentials.")
+        except AuthenticationFailed as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_401_UNAUTHORIZED
+            )
         response = self.presenter.present_login(tokens)
         secure = not settings.DEBUG
         response.set_cookie(
@@ -85,6 +96,7 @@ class LoginController(APIView):
         return response
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LogoutController(APIView):
     """Controller handling user logout requests by invalidating
     and removing authentication tokens."""
@@ -110,8 +122,10 @@ class LogoutController(APIView):
             )
         try:
             self.use_case.logout(refresh_token)
-        except ValueError as exc:
-            return self.presenter.present_error(str(exc))
+        except TokenBlacklistError as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_400_BAD_REQUEST
+            )
         response = self.presenter.present_logout()
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")

@@ -2,16 +2,17 @@
 
 """Controller for account-related HTTP requests and responses."""
 
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from common.events import publish_event
 from accounts.service.application.use_cases import AccountUseCase
 from accounts.service.interface_adapters.presenters import AccountPresenter
-from accounts.service.models import AccountModel
 from accounts.service.infrastructure.django_account_repository import (
     DjangoAccountRepository,
 )
+from accounts.service.exceptions import AccountNotFound, AccountConflict
 
 
 class AccountController(APIView):
@@ -31,9 +32,12 @@ class AccountController(APIView):
             Response object with account data or not found error.
         """
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
-        entity = self.use_case.get_account(user_id)
-        if not entity:
-            return self.presenter.present_not_found()
+        try:
+            entity = self.use_case.get_account(user_id)
+        except AccountNotFound as exc:
+            return self.presenter.present_error(
+                str(exc), code=status.HTTP_404_NOT_FOUND
+            )
         return self.presenter.present_account(entity)
 
     def put(self, request):
@@ -55,8 +59,10 @@ class AccountController(APIView):
                 data.get("bio"),
                 data.get("profile_picture"),
             )
-        except AccountModel.DoesNotExist:
+        except AccountNotFound:
             return self.presenter.present_not_found()
+        except AccountConflict as exc:
+            return self.presenter.present_error(str(exc), code=status.HTTP_409_CONFLICT)
         entity = updated
         publish_event("account.updated", entity.to_dict())
         return self.presenter.present_account(updated)
@@ -71,6 +77,9 @@ class AccountController(APIView):
             Response object confirming account deletion.
         """
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
-        self.use_case.delete_account(user_id)
+        try:
+            self.use_case.delete_account(user_id)
+        except AccountNotFound:
+            return self.presenter.present_not_found()
         publish_event("account.deleted", {"user_id": user_id})
         return self.presenter.present_deleted()

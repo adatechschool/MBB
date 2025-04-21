@@ -1,115 +1,88 @@
-<!-- README.md -->
-
-Here’s a high‑level review and analysis of the entire micro‑blogging project, organized by layer and service, with notes on strengths, inconsistencies, and areas for improvement.
+Here’s a high‑level code‑review and architectural analysis of your micro‑blogging suite:
 
 ---
 
-## 1. Overall Architecture  
-- **Microservices**: Three Django‑based services—**authentication**, **accounts**, and **sessions**—all sharing a common settings module and talking to each other over HTTP plus Kafka events.  
-- **Layered clean‑architecture** in each service:  
-  - **Interface adapters** (controllers + presenters)  
-  - **Use case** layer  
-  - **Repository** interfaces + concrete Django/SQLAlchemy implementations  
-  - **Core entities**  
+## 1. Overall Architecture & Modularity
+
+- **Microservice separation**  
+  You’ve broken the system into three Django services—Authentication, Accounts, and Sessions—each with its own settings, URL config, and Docker container. This gives you strong independence in deployment and scaling.  
+- **Shared “common” modules**  
+  Common DTOs, event‑publishing, and settings live in a shared folder. This avoids duplication but can introduce tight coupling if changes ripple through multiple repos.  
+
+**Suggestions**  
+1. Consider extracting “common” into its own PyPI package (or git submodule) so you can version‑lock changes.  
+2. Add an API Gateway or shared reverse proxy (e.g. Traefik) to centralize routing, CORS and authentication, rather than exposing each service’s port directly.
+
+---
+
+## 2. Domain & Data Modeling
+
+### Django models vs SQL schema
+
+- In `micro_blogging.py` you use `BinaryField` for `profile_picture` and `media_content`. In your SQL dump, `media_type` and `role_name` include database‐level `CHECK` constraints (`IN ('image','video')`, `IN ('user','admin','moderator')`), but your Django models don’t declare those choices.  
+- `AccountModel` in the Accounts service reuses the `"User"` table, but you never set `AUTH_USER_MODEL` in settings—so Django’s built‑in auth isn’t actually pointing at your `User` table. Meanwhile the Authentication service calls `get_user_model()`, which by default is the standard Django user, not your microblog `User`.  
+
+**Suggestions**  
+- **Unify your user model**: subclass `AbstractBaseUser` and set `AUTH_USER_MODEL` once, so all services refer to the same definition.  
+- **Add `choices=` on role_name/media_type** in the Django model to keep model and database in sync and get form validation for free.  
+- Consider using Django’s `ImageField` (backed by S3 or a CDN) instead of raw `BinaryField`, especially for large files.
+
+---
+
+## 3. Repository/Use‑Case Layer
+
+- You’ve adopted a clean “ports & adapters” style:  
+  - **UseCases** sit in `service/application/use_cases.py`  
+  - **Repository interfaces** define contracts in `…repositories.py`  
+  - **Django ORM repositories** implement those contracts  
+- DTOs (via Pydantic) decouple your internal models from external APIs.
 
 **Strengths**  
-- Clear separation of concerns: business logic (use cases) is decoupled from Django or HTTP.  
-- Reusable “common” modules: DTOs, presenters, event publishing.  
-- Shared base settings avoids duplication.  
-
-**Risks / Inconsistencies**  
-- Only three services cover auth, accounts, sessions—but the SQL schema & SQLAlchemy models define Posts, Comments, Likes, Media, Hashtags, Follows, Roles. No Django service implements those. Either post/comment/etc. services are missing, or SQLAlchemy models are orphaned.  
-- Two ORM styles coexist: Django ORM in services vs SQLAlchemy in `micro_blogging.py`. Mixing both can confuse data migrations, model syncing, and developer onboarding.
-
----
-
-## 2. Configuration & Settings  
-- **`config/settings/base.py`** centralizes SECRET_KEY, DEBUG, INSTALLED_APPS, middleware, JWT, CORS, DB config, etc.  
-- Each service’s `config/settings/*.py` simply does `from config.settings.base import *` then appends its own apps + overrides `ROOT_URLCONF`/`WSGI_APPLICATION`.  
-- **.env** holds all secrets & URLs.  
-
-**Notes**  
-- Make sure your Docker containers set `DJANGO_SETTINGS_MODULE=config.settings.accounts` (or `.authentication`, `.sessions`) rather than the generic `config.settings`.  
-- Consider splitting dev/prod overrides (e.g. different DB hosts) into `base.py` + `dev.py` + `prod.py`.  
-
----
-
-## 3. Authentication Service  
-- **Controllers**: Register, Login, Logout all subclass DRF `APIView`.  
-- **Use case** always returns values now (e.g. user_id, `AuthTokens`), so controllers don’t assign from a no‑return call.  
-- **JWT in cookies**: good pattern—`CookieJWTAuthentication` pulls `access_token` from the cookie.  
-- **Token rotation + blacklist** via `simplejwt.token_blacklist`.  
+- Clear separation of concerns and easy to swap out persistence layers.  
+- Pydantic DTOs give you validation and serialization.
 
 **Opportunities**  
-- CSRF: DRF’s `CsrfViewMiddleware` is enabled globally; consider whether your login/logout endpoints need CSRF exemptions or double‑submit cookies.  
-- Error handling: all `ValueError` in use case bubble up to generic 400. You might want fine‑grained exceptions (e.g. `UserAlreadyExists` → 409).  
-- Testing: no tests shown; add unit tests for use cases + integration tests for endpoints.
+1. In your `DjangoAccountRepository.get_account()` you catch `DoesNotExist` and re‑raise `AccountNotFound`, but in `delete_account()` you catch and swallow exceptions—consider unifying: always raise `AccountNotFound` if no rows were affected.  
+2. For high‑throughput, you might batch‐publish Kafka events asynchronously (e.g. via Celery) instead of calling `producer.flush()` synchronously on each request.
 
 ---
 
-## 4. Account Service  
-- **Controllers**: single `AccountController` handling GET/PUT/DELETE at `/api/accounts/{get,update,delete}/account/`.  
-- **Repository** uses Django ORM `AccountModel` (with `profile_picture` as `BinaryField` + base64 encoding in the adapter).  
-- **Client**: `AccountClient` defines all four CRUD methods (including `create_account`) with timeouts and returns `AccountDTO`.  
+## 4. Error Handling & HTTP Semantics
 
-**Notes**  
-- **Duplication of credentials**: your `AccountModel` still has `password`—but authentication is owned by the auth service. You probably don’t want to store or expose passwords here.  
-- **Endpoint design**: grouping `get`, `update`, `delete` on the same controller is fine, but REST convention would be a single `/api/accounts/profile/` resource with GET/PUT/DELETE on the same URL.  
-- **DTO vs Entity**: you convert `AccountModel` → `AccountEntity` → JSON via the presenter → client → `AccountDTO`. That’s a lot of layers—evaluate if any can be simplified.
+- Controllers map domain exceptions to HTTP codes—404 for not‑found, 409 for conflicts, etc.  
+- You consistently wrap responses in `{status, data, error}` envelopes.
 
----
-
-## 5. Session Service  
-- **Controllers** for creating (`POST /add/`), listing (`GET /current/`), and refreshing JWT cookies (`POST /refresh/`).  
-- **Repository** persists `SessionModel` with `session_id`, `token`, `expires_at`.  
-- **Client** publishes `session.created`/`session.refreshed` events.  
-
-**Comments**  
-- Session creation duplicates the logic of JWT token expiry—ensure there’s a cleanup job for expired sessions.  
-- Refresh endpoint uses DRF’s `TokenRefreshSerializer` but uses `AllowAny`; consider rate‑limiting or requiring a valid session lookup before issuing new tokens.
+**Edge Cases**  
+- In your token‐refresh view, any unexpected exception becomes a 401. It may be more appropriate to return 500 on truly unexpected errors, so clients can distinguish bad tokens from server faults.  
+- In session refresh, you accept the old token when the new one isn’t provided, but you don’t explicitly blacklist the old one unless `new_refresh` is present. Make sure that aligns with your security requirements.
 
 ---
 
-## 6. Data Modeling & Persistence  
-- **SQL DDL** in `micro_blogging.sql` covers User, Post, Comment, Like, Hashtag, Role, Session, Follow, Media.  
-- **SQLAlchemy models** mirror that schema exactly, with relationships and constraints.  
+## 5. DevOps & Tooling
 
-**Gaps**  
-- No Django migrations for Posts, Comments, Likes, etc. If you intend to use Django ORM, you’ll need to scaffold models and migrations for those entities.  
-- If your plan is to use SQLAlchemy directly in one “monolith” service for post data, that’s outside the three Django services—make that intention explicit.  
+- **Docker compose** uses env‑vars for ports and credentials—nice 12‑factor style.  
+- **Pre‑commit** excludes `micro_blogging.py` to work around Black’s missing encoding declaration.  
+- **Flake8** excludes migrations and your single file; you ignore E501/E265 to allow long lines and comment styles.
 
----
-
-## 7. Infrastructure (Docker & Deployment)  
-- **Dockerfiles**: multi‑stage Alpine builds, wheels caching, separate builder/runtime images. Good lean images.  
-- **docker-compose.yml**: spins up `db`, and three services on ports 8000–8002. Environment is mounted from `.env`.  
-
-**Improvements**  
-- Healthchecks in `docker-compose` so that services don’t start before DB is ready.  
-- Separate service networks if you eventually add more microservices.  
-- Use named volumes for static/media (if you ever serve uploads).  
-- Consider Kubernetes manifests or CI/CD pipelines for production.
+**Recommendations**  
+1. Rather than excluding `micro_blogging.py` from Black, add `# -*- coding: utf-8 -*-` at the top so Black can parse it—or explicitly add `# fmt: off` if you truly never want it formatted.  
+2. Add a CI pipeline (GitHub Actions, GitLab CI) that runs your pre‑commit checks—and also runs `pytest` on each service (with an SQLite in‑memory DB) to catch regressions early.  
+3. Keep your `.env` out of version control; consider a secrets manager (Vault, AWS Secrets Manager) for production.
 
 ---
 
-## 8. Code Quality & Best Practices  
-- **Pylint** warnings (assignment from no‑return, missing timeouts) have been addressed.  
-- **Type hints**: present in most application code, but DRF serializers/controllers could also be type‑annotated.  
-- **Consistency**: stick to one ORM or clearly separate the two.  
-- **Logging**: no centralized logging or request tracing; add structured logs in middleware or present‑ers.  
-- **Error handling**: presenters wrap errors consistently, but upstream exceptions (DB errors, network errors) aren’t always caught—consider global exception handling.
+## 6. Security & Best Practices
+
+- You’re using JWTs with short lifetimes and rotating/blacklisting refresh tokens—good.  
+- You haven’t enabled HTTPS settings (e.g. `SECURE_SSL_REDIRECT`) in production mode.  
+
+**To harden**  
+- In production, enforce HTTPS, set `SESSION_COOKIE_SECURE = True` and `CSRF_COOKIE_SECURE = True`.  
+- Use `django‑axes` or a similar rate‑limiting app on login endpoints to guard against brute‑force.  
+- Ensure `DEBUG=False` in production and configure `ALLOWED_HOSTS` accordingly.
 
 ---
 
-## 9. Potential Next Steps  
-1. **Fill in “missing” domain services** for Posts, Comments, Likes, Media, Hashtags, Follows.  
-2. **Automate migrations** & schema management: either Django migrations or Alembic for SQLAlchemy.  
-3. **Add test coverage**: unit tests for use cases + repository + clients; API tests for controllers, perhaps via pytest‑django.  
-4. **API docs**: integrate Swagger/OpenAPI (e.g. drf‑spectacular) across all services.  
-5. **Observability**: add Prometheus metrics, health endpoints, centralized logging.  
-6. **Security audit**: ensure CORS, CSRF, cookie flags, JWT secrets rotation, and Kafka credentials are production‑hardened.
+### Conclusion
 
----
-
-### Conclusion  
-This codebase shows a thoughtful clean‑architecture approach with clear layering and microservices boundaries. To complete the picture, you’ll want to implement the missing domain services (posts/comments/etc.), reconcile your dual‑ORM strategy, and ramp up on testing, migrations, and observability. Once those pieces are in place, you’ll have a solid, scalable micro‑blogging platform.
+You’ve built a clean, well‑layered microservices Django system with clear separation of domain logic and API controllers, good use of DTOs, and solid CI tooling. Addressing the few discrepancies between your ORM models and the raw SQL schema, unifying your user model, refining error handling, and tightening security will take you the rest of the way to a production‑grade platform. Let me know if you’d like deeper guidance on any of these points!

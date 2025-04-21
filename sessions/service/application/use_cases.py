@@ -5,7 +5,7 @@
 from typing import List
 
 from sessions.service.application.repositories import SessionRepositoryInterface
-from sessions.service.domain.entities import SessionModel
+from sessions.service.domain.entities import Session
 
 
 class SessionUseCase:
@@ -14,7 +14,7 @@ class SessionUseCase:
     def __init__(self, repo: SessionRepositoryInterface):
         self.repo = repo
 
-    def create_session(self, user_id: int, refresh_token: str) -> SessionModel:
+    def create_session(self, user_id: int, refresh_token: str) -> Session:
         """Create a new session for a user with the given refresh token.
 
         Args:
@@ -22,24 +22,24 @@ class SessionUseCase:
             refresh_token (str): The refresh token for the session
 
         Returns:
-            SessionModel: The newly created session entity
+            Session: The newly created session entity
         """
         return self.repo.create_session(user_id, refresh_token)
 
-    def get_current_sessions(self, user_id: int) -> List[SessionModel]:
+    def get_current_sessions(self, user_id: int) -> List[Session]:
         """Get all current sessions for a user.
 
         Args:
             user_id (int): The ID of the user whose sessions to retrieve
 
         Returns:
-            List[SessionModel]: List of current session entities for the user
+            List[Session]: List of current session entities for the user
         """
         return self.repo.get_sessions(user_id)
 
     def refresh_session(
         self, old_refresh_token: str, new_refresh_token: str
-    ) -> SessionModel:
+    ) -> Session:
         """Refresh a session by replacing its refresh token.
 
         Args:
@@ -47,6 +47,6 @@ class SessionUseCase:
             new_refresh_token (str): The new refresh token to replace the old one
 
         Returns:
-            SessionModel: The updated session entity
+            Session: The updated session entity
         """
         return self.repo.refresh_session(old_refresh_token, new_refresh_token)

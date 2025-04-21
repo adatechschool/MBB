@@ -109,7 +109,7 @@ DATABASES = {
 }
 
 # Auth
-# AUTH_USER_MODEL = "users_service.User"
+AUTH_USER_MODEL = "common.database.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -3,7 +3,7 @@
 """Django ORM implementation of the authentication repository interface."""
 
 from django.db import IntegrityError
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -14,8 +14,7 @@ from authentication.service.exceptions import (
 )
 from authentication.service.application.repositories import AuthRepositoryInterface
 from authentication.service.domain.entities import AuthModel
-
-User = get_user_model()
+from common.database import User
 
 
 class DjangoAuthRepository(AuthRepositoryInterface):

@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.db import IntegrityError
 
 from accounts.service.application.repositories import AccountRepositoryInterface
-from accounts.service.domain.entities import AccountModel
+from accounts.service.domain.entities import User
 from accounts.service.exceptions import AccountNotFound, AccountConflict
 from common.dtos import AccountDTO
 
@@ -20,8 +20,8 @@ class DjangoAccountRepository(AccountRepositoryInterface):
 
     def get_account(self, user_id: int) -> Optional[AccountDTO]:
         try:
-            user = AccountModel.objects.get(user_id=user_id)
-        except AccountModel.DoesNotExist as exc:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist as exc:
             raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
         picture_b64 = None
         if user.profile_picture:
@@ -45,8 +45,8 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         profile_picture: Optional[str],
     ) -> AccountDTO:
         try:
-            user = AccountModel.objects.get(user_id=user_id)
-        except AccountModel.DoesNotExist as exc:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist as exc:
             raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
         user.username = username
         user.email = email
@@ -70,6 +70,6 @@ class DjangoAccountRepository(AccountRepositoryInterface):
 
     def delete_account(self, user_id: int) -> None:
         try:
-            AccountModel.objects.filter(user_id=user_id).delete()
-        except AccountModel.DoesNotExist as exc:
+            User.objects.filter(user_id=user_id).delete()
+        except User.DoesNotExist as exc:
             raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc

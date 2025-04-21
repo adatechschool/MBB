@@ -2,4 +2,4 @@
 
 """Django settings for the authentication service."""
 
-from config.settings.authentication import *  # noqa
+from configuration.settings.authentication import *  # noqa

@@ -2,7 +2,7 @@
 
 """Authentication service Django settings."""
 
-from config.settings.base import (
+from configuration.settings.base import (
     INSTALLED_APPS,
 )
 

@@ -2,4 +2,4 @@
 
 """Django settings for the sessions service."""
 
-from config.settings.sessions import *  # noqa
+from configuration.settings.sessions import *  # noqa

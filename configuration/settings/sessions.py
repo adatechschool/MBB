@@ -2,7 +2,7 @@
 
 """Django settings for the sessions service."""
 
-from config.settings.base import (
+from configuration.settings.base import (
     INSTALLED_APPS,
 )
 

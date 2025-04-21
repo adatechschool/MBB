@@ -2,4 +2,4 @@
 
 """Django settings for the accounts service."""
 
-from config.settings.accounts import *  # noqa
+from configuration.settings.accounts import *  # noqa

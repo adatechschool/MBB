@@ -2,7 +2,7 @@
 
 """Django settings for the accounts service."""
 
-from config.settings.base import (
+from configuration.settings.base import (
     INSTALLED_APPS,
 )
 

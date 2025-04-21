@@ -2,14 +2,11 @@
 
 """Authentication service Django settings."""
 
-from configuration.settings.base import (
-    INSTALLED_APPS,
-)
+from configuration.settings.base import *  # noqa
 
-INSTALLED_APPS += [
+INSTALLED_APPS += [  # noqa
     "authentication.service.apps.AuthenticationServiceConfig",
     "sessions.service.apps.SessionsServiceConfig",
-    "users.service.apps.UsersServiceConfig",
 ]
 
 ROOT_URLCONF = "authentication.config.urls"

@@ -2,13 +2,10 @@
 
 """Django settings for the sessions service."""
 
-from configuration.settings.base import (
-    INSTALLED_APPS,
-)
+from configuration.settings.base import *  # noqa
 
-INSTALLED_APPS += [
+INSTALLED_APPS += [  # noqa
     "sessions.service.apps.SessionsServiceConfig",
-    "users.service.apps.UsersServiceConfig",
 ]
 
 ROOT_URLCONF = "sessions.config.urls"

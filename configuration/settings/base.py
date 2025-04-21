@@ -1,4 +1,4 @@
-# config\settings\base.py
+# configuration\settings\base.py
 
 """
 Django base settings module containing common configurations shared across environments.
@@ -13,12 +13,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(BASE_DIR / ".env")
+env_path = find_dotenv()
+load_dotenv(env_path)
 
 # SECURITY
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -110,7 +109,7 @@ DATABASES = {
 }
 
 # Auth
-AUTH_USER_MODEL = "users_service.User"
+# AUTH_USER_MODEL = "users_service.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {

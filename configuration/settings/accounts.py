@@ -1,15 +1,12 @@
-# config/settings/accounts.py
+# configuration\settings\accounts.py
 
 """Django settings for the accounts service."""
 
-from configuration.settings.base import (
-    INSTALLED_APPS,
-)
+from configuration.settings.base import *  # noqa
 
 # Service-specific apps
-INSTALLED_APPS += [
+INSTALLED_APPS += [  # noqa
     "accounts.service.apps.AccountsServiceConfig",
-    "users.service.apps.UsersServiceConfig",
 ]
 
 # URLs & WSGI

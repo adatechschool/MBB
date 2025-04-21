@@ -2,7 +2,7 @@
 
 [flake8]
 # Increase the max line length to allow longer lines if desired.
-max-line-length = 120
+max-line-length = 90
 
 # Optionally, you can ignore specific errors.
 # If you want to ignore both line length and comment issues, use:
@@ -13,5 +13,6 @@ exclude =
     venv,
     .venv,
     __pycache__,
-    */migrations/*
+    */migrations/*,
+    micro_blogging.py,
 

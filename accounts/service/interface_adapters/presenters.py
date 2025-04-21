@@ -1,15 +1,15 @@
-# accounts/service/interface_adapters/presenters.py
+# accounts\service\interface_adapters\presenters.py
 
 """Presenter for formatting account HTTP responses."""
 
 from common.presenters import BasePresenter
-from accounts.service.core.entities import AccountEntity
+from common.dtos import AccountDTO
 
 
 class AccountPresenter(BasePresenter):
     """Presenter class responsible for formatting account-related HTTP responses."""
 
-    def present_account(self, entity: AccountEntity):
+    def present_account(self, entity: AccountDTO):
         """Format an account entity into a successful HTTP response.
 
         Args:

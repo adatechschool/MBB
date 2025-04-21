@@ -1,4 +1,6 @@
-# sessions/service/exceptions.py
+# sessions\service\exceptions.py
+
+"""Contains custom exceptions for the sessions service."""
 
 
 class SessionNotFound(Exception):

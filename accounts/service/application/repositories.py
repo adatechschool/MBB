@@ -5,14 +5,14 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from accounts.service.core.entities import AccountEntity
+from accounts.service.domain.entities import AccountModel
 
 
 class AccountRepositoryInterface(ABC):
     """Interface defining the contract for account management operations in the repository layer."""
 
     @abstractmethod
-    def get_account(self, user_id: int) -> Optional[AccountEntity]:
+    def get_account(self, user_id: int) -> Optional[AccountModel]:
         """Retrieve an account by user ID.
 
         Args:
@@ -30,7 +30,7 @@ class AccountRepositoryInterface(ABC):
         email: str,
         bio: str,
         profile_picture: Optional[str],
-    ) -> AccountEntity:
+    ) -> AccountModel:
         """Update an account with the given information.
 
         Args:

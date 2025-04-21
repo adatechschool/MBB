@@ -1,11 +1,11 @@
-# accounts/service/application/use_cases.py
+# accounts\service\application\use_cases.py
 
 """Use case layer for account operations."""
 
 from typing import Optional
 
 from accounts.service.application.repositories import AccountRepositoryInterface
-from accounts.service.core.entities import AccountEntity
+from common.dtos import AccountDTO
 
 
 class AccountUseCase:
@@ -14,7 +14,7 @@ class AccountUseCase:
     def __init__(self, repo: AccountRepositoryInterface):
         self.repo = repo
 
-    def get_account(self, user_id: int) -> Optional[AccountEntity]:
+    def get_account(self, user_id: int) -> Optional[AccountDTO]:
         """Retrieve an account by user ID.
 
         Args:
@@ -32,7 +32,7 @@ class AccountUseCase:
         email: str,
         bio: str,
         profile_picture: Optional[str],
-    ) -> AccountEntity:
+    ) -> AccountDTO:
         """Update an account with new information.
 
         Args:

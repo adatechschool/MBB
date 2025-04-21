@@ -1,4 +1,4 @@
-# authentication/service/views.py
+# authentication\service\views.py
 
 """URL configuration for authentication service endpoints."""
 

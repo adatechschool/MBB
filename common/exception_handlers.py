@@ -1,4 +1,11 @@
-# common/exception_handlers.py
+# common\exception_handlers.py
+
+"""Custom exception handlers for the API.
+
+This module contains custom exception handlers to provide consistent error responses
+across the API. It handles specific exceptions like UserAlreadyExists and
+AuthenticationFailed with appropriate HTTP status codes and formatted error messages.
+"""
 
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
@@ -11,6 +18,15 @@ from authentication.service.exceptions import (
 
 
 def custom_exception_handler(exc, context):
+    """Handle custom exceptions and return appropriate API responses.
+
+    Args:
+        exc: The exception that was raised
+        context: Additional context information
+
+    Returns:
+        Response: A REST framework Response object with error details
+    """
     response = exception_handler(exc, context)
     if response is not None:
         return response

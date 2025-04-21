@@ -1,4 +1,4 @@
-# accounts/service/interface_adapters/controllers.py
+# accounts\service\interface_adapters\controllers.py
 
 """Controller for account-related HTTP requests and responses."""
 

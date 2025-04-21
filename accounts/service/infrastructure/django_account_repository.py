@@ -1,4 +1,4 @@
-# accounts/service/infrastructure/django_account_repository.py
+# accounts\service\infrastructure\django_account_repository.py
 
 """Django ORM implementation of the account repository interface."""
 
@@ -8,23 +8,25 @@ from django.utils import timezone
 from django.db import IntegrityError
 
 from accounts.service.application.repositories import AccountRepositoryInterface
-from accounts.service.core.entities import AccountEntity
-from accounts.service.models import AccountModel
+from accounts.service.domain.entities import AccountModel
 from accounts.service.exceptions import AccountNotFound, AccountConflict
+from common.dtos import AccountDTO
+
+ACCOUNT_NOT_FOUND_MESSAGE = "Account not found."
 
 
 class DjangoAccountRepository(AccountRepositoryInterface):
     """Django ORM implementation of the account repository interface."""
 
-    def get_account(self, user_id: int) -> Optional[AccountEntity]:
+    def get_account(self, user_id: int) -> Optional[AccountDTO]:
         try:
             user = AccountModel.objects.get(user_id=user_id)
         except AccountModel.DoesNotExist as exc:
-            raise AccountNotFound("Account not found.") from exc
+            raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
         picture_b64 = None
         if user.profile_picture:
             picture_b64 = base64.b64encode(user.profile_picture).decode()
-        return AccountEntity(
+        return AccountDTO(
             user_id=user.user_id,
             username=user.username,
             email=user.email,
@@ -41,11 +43,11 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         email: str,
         bio: str,
         profile_picture: Optional[str],
-    ) -> AccountEntity:
+    ) -> AccountDTO:
         try:
             user = AccountModel.objects.get(user_id=user_id)
         except AccountModel.DoesNotExist as exc:
-            raise AccountNotFound("Account not found.") from exc
+            raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
         user.username = username
         user.email = email
         user.bio = bio
@@ -70,4 +72,4 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         try:
             AccountModel.objects.filter(user_id=user_id).delete()
         except AccountModel.DoesNotExist as exc:
-            raise AccountNotFound("Account not found.") from exc
+            raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc

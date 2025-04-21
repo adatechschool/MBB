@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 
-from authentication.service.core.entities import AuthTokens
+from authentication.service.domain.entities import AuthModel
 
 
 class AuthRepositoryInterface(ABC):
@@ -15,7 +15,7 @@ class AuthRepositoryInterface(ABC):
         """Create a new user account"""
 
     @abstractmethod
-    def authenticate(self, username: str, password: str) -> AuthTokens:
+    def authenticate(self, username: str, password: str) -> AuthModel:
         """Validate credentials and return JWT tokens"""
 
     @abstractmethod

@@ -1,4 +1,6 @@
-# accounts/service/exceptions.py
+# accounts\service\exceptions.py
+
+"""Custom exceptions for the accounts service module."""
 
 
 class AccountNotFound(Exception):

@@ -3,7 +3,7 @@
 """Use case layer for authentication operations."""
 
 from authentication.service.application.repositories import AuthRepositoryInterface
-from authentication.service.core.entities import AuthTokens
+from authentication.service.domain.entities import AuthModel
 
 
 class AuthUseCase:
@@ -25,7 +25,7 @@ class AuthUseCase:
         """
         return self.repo.register(username, email, password)
 
-    def login(self, username: str, password: str) -> AuthTokens:
+    def login(self, username: str, password: str) -> AuthModel:
         """Authenticate a user with the given credentials.
 
         Args:
@@ -33,7 +33,7 @@ class AuthUseCase:
             password (str): The password of the account
 
         Returns:
-            AuthTokens: Authentication tokens for the user
+            AuthModel: Authentication tokens for the user
         """
         return self.repo.authenticate(username, password)
 

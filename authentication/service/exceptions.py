@@ -1,4 +1,6 @@
-# authentication/service/core/exceptions.py
+# authentication\service\exceptions.py
+
+"""Custom exceptions for the authentication service."""
 
 
 class UserAlreadyExists(Exception):

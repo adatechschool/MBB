@@ -6,19 +6,19 @@ from datetime import datetime, timezone as dt_timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from sessions.service.application.repositories import SessionRepositoryInterface
-from sessions.service.core.entities import SessionEntity
-from sessions.service.models import SessionModel
+from sessions.service.domain.entities import SessionModel
 from sessions.service.exceptions import (
     SessionCreateError,
     SessionNotFound,
     SessionRefreshError,
 )
+from common.dtos import SessionDTO
 
 
 class DjangoSessionRepository(SessionRepositoryInterface):
     """Django ORM implementation for managing user sessions in the database."""
 
-    def create_session(self, user_id: int, refresh_token: str) -> SessionEntity:
+    def create_session(self, user_id: int, refresh_token: str) -> SessionDTO:
         token_obj = RefreshToken(refresh_token)
         expires_ts = token_obj["exp"]
         expires_at = datetime.fromtimestamp(expires_ts, tz=dt_timezone.utc)
@@ -30,7 +30,7 @@ class DjangoSessionRepository(SessionRepositoryInterface):
             )
         except Exception as exc:
             raise SessionCreateError("Session creation failed.") from exc
-        return SessionEntity(
+        return SessionDTO(
             session_id=session.session_id,
             user_id=session.user_id,
             token=session.token,
@@ -38,12 +38,12 @@ class DjangoSessionRepository(SessionRepositoryInterface):
             expires_at=session.expires_at,
         )
 
-    def get_sessions(self, user_id: int) -> list[SessionEntity]:
+    def get_sessions(self, user_id: int) -> list[SessionDTO]:
         sessions = SessionModel.objects.filter(user_id=user_id)
         if not sessions:
             raise SessionNotFound("Session not found.")
         return [
-            SessionEntity(
+            SessionDTO(
                 session_id=s.session_id,
                 user_id=s.user_id,
                 token=s.token,
@@ -55,7 +55,7 @@ class DjangoSessionRepository(SessionRepositoryInterface):
 
     def refresh_session(
         self, old_refresh_token: str, new_refresh_token: str
-    ) -> SessionEntity:
+    ) -> SessionDTO:
         session = SessionModel.objects.get(token=old_refresh_token)
         token_obj = RefreshToken(new_refresh_token)
         expires_ts = token_obj["exp"]
@@ -66,7 +66,7 @@ class DjangoSessionRepository(SessionRepositoryInterface):
             session.save(update_fields=["token", "expires_at"])
         except Exception as exc:
             raise SessionRefreshError("Session refresh failed.") from exc
-        return SessionEntity(
+        return SessionDTO(
             session_id=session.session_id,
             user_id=session.user_id,
             token=session.token,

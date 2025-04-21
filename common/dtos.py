@@ -22,7 +22,7 @@ class AccountDTO(BaseModel):
     username: str
     email: str
     bio: Optional[str] = None
-    profile_picture: Optional[str] = None  # base64-encoded string
+    profile_picture: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

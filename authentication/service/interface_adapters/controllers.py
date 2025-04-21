@@ -14,14 +14,14 @@ from authentication.service.infrastructure.django_auth_repository import (
     DjangoAuthRepository,
 )
 from authentication.service.interface_adapters.presenters import AuthPresenter
-from accounts.service.client import AccountClient
-from sessions.service.client import SessionClient
-from common.events import publish_event
 from authentication.service.exceptions import (
     UserAlreadyExists,
     AuthenticationFailed,
     TokenBlacklistError,
 )
+from accounts.service.client import AccountClient
+from sessions.service.client import SessionClient
+from common.events import publish_event
 
 
 @method_decorator(csrf_exempt, name="dispatch")

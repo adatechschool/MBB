@@ -1,4 +1,4 @@
-# authentication/service/core/entities.py
+# authentication\service\domain\entities.py
 
 """Domain entity representing JWT auth tokens."""
 
@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class AuthTokens:
+class AuthModel:
     """Domain entity representing JWT auth tokens."""
 
     access: str

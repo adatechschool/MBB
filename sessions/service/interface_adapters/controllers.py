@@ -10,6 +10,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from sessions.service.application.use_cases import SessionUseCase
 from sessions.service.infrastructure.django_session_repository import (
@@ -140,21 +142,13 @@ class CookieTokenRefreshView(APIView):
             serializer.is_valid(raise_exception=True)
             access = serializer.validated_data["access"]
             new_refresh = serializer.validated_data.get("refresh")
+            RefreshToken(refresh_token).blacklist()
             if new_refresh:
                 self.use_case.refresh_session(refresh_token, new_refresh)
                 refresh_value = new_refresh
             else:
                 refresh_value = refresh_token
-        except SessionRefreshError as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_400_BAD_REQUEST, "message": str(exc)},
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except Exception as exc:
+        except TokenError as exc:
             return Response(
                 {
                     "status": "error",
@@ -165,6 +159,30 @@ class CookieTokenRefreshView(APIView):
                     },
                 },
                 status=status.HTTP_401_UNAUTHORIZED,
+            )
+        except SessionRefreshError as exc:
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {
+                        "code": status.HTTP_400_BAD_REQUEST,
+                        "message": str(exc),
+                    },
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as exc:
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {
+                        "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        "message": str(exc),
+                    },
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         response = Response(
             {

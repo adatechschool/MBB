@@ -40,3 +40,13 @@ kafka-python
 requests>=2.28.0
 types-requests
 pydantic
+
+# image processing
+Pillow>=9.0
+
+# S3/CDN storage
+django-storages[boto3]>=1.12
+boto3>=1.24
+
+celery
+redis

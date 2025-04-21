@@ -75,6 +75,10 @@ CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 CORS_ALLOW_CREDENTIALS = True
 CORS_EXPOSE_HEADERS = ["Set-Cookie"]
 
+SESSION_COOKIE_SECURE = os.getenv("DEBUG") == "True"
+CSRF_COOKIE_SECURE = os.getenv("DEBUG") == "True"
+SECURE_SSL_REDIRECT = os.getenv("DEBUG") == "True"
+
 # URLs & WSGI defaults (override per-service as needed)
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"

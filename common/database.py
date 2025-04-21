@@ -1,4 +1,5 @@
 # common\database.py
+# -*- coding: utf-8 -*-
 
 """Django models for a micro-blogging application.
 
@@ -189,7 +190,12 @@ class Media(models.Model):
         on_delete=models.CASCADE,
         help_text="Post this media belongs to",
     )
-    media_type = models.CharField(max_length=255, blank=True)
+    media_type = models.CharField(
+        max_length=50,
+        choices=[("image", "Image"), ("video", "Video")],
+        default="image",
+        blank=True,
+    )
     media_content = models.BinaryField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

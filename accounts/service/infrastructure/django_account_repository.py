@@ -69,7 +69,6 @@ class DjangoAccountRepository(AccountRepositoryInterface):
         return self.get_account(user_id)
 
     def delete_account(self, user_id: int) -> None:
-        try:
-            User.objects.filter(user_id=user_id).delete()
-        except User.DoesNotExist as exc:
-            raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
+        deleted_count, _ = User.objects.filter(user_id=user_id).delete()
+        if deleted_count == 0:
+            raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE)

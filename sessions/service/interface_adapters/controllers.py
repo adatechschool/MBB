@@ -2,19 +2,19 @@
 
 """Controller for session-related HTTP requests and responses."""
 
-from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from sessions.service.application.use_cases import SessionUseCase
 from sessions.service.infrastructure.django_session_repository import (
     DjangoSessionRepository,
 )
-from sessions.service.interface_adapters.presenters import SessionPresenter
 from sessions.service.exceptions import (
     SessionCreateError,
     SessionNotFound,
@@ -31,7 +31,6 @@ class SessionController(APIView):
 
     permission_classes = [IsAuthenticated]
     use_case = SessionUseCase(DjangoSessionRepository())
-    presenter = SessionPresenter()
 
     def post(self, request):
         """Create a new session for an authenticated user.
@@ -44,17 +43,33 @@ class SessionController(APIView):
         """
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
-            return self.presenter.present_error(
-                "Refresh token not provided.", code=status.HTTP_401_UNAUTHORIZED
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "message": "Refresh token not provided.",
+                    },
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
-            entity = self.use_case.create_session(user_id, refresh_token)
+            dto = self.use_case.create_session(user_id, refresh_token)
         except SessionCreateError as exc:
-            return self.presenter.present_error(
-                str(exc), code=status.HTTP_400_BAD_REQUEST
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_400_BAD_REQUEST, "message": str(exc)},
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        return self.presenter.present_session_created(entity)
+        return Response(
+            {"status": "success", "data": dto.to_dict(), "error": None},
+            status=status.HTTP_201_CREATED,
+        )
 
     def get(self, request):
         """Get all current sessions for an authenticated user.
@@ -67,12 +82,24 @@ class SessionController(APIView):
         """
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
-            entities = self.use_case.get_current_sessions(user_id)
+            dtos = self.use_case.get_current_sessions(user_id)
         except SessionNotFound as exc:
-            return self.presenter.present_error(
-                str(exc), code=status.HTTP_404_NOT_FOUND
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
-        return self.presenter.present_sessions(entities)
+        return Response(
+            {
+                "status": "success",
+                "data": [dto.to_dict() for dto in dtos],
+                "error": None,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -85,7 +112,6 @@ class CookieTokenRefreshView(APIView):
 
     permission_classes = [AllowAny]
     use_case = SessionUseCase(DjangoSessionRepository())
-    presenter = SessionPresenter()
 
     def post(self, request):
         """Handle refresh token rotation and access token renewal.
@@ -98,8 +124,16 @@ class CookieTokenRefreshView(APIView):
         """
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
-            return self.presenter.present_error(
-                "Refresh token not provided.", code=status.HTTP_401_UNAUTHORIZED
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "message": "Refresh token not provided.",
+                    },
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
         try:
             serializer = TokenRefreshSerializer(data={"refresh": refresh_token})
@@ -112,14 +146,34 @@ class CookieTokenRefreshView(APIView):
             else:
                 refresh_value = refresh_token
         except SessionRefreshError as exc:
-            return self.presenter.present_error(
-                str(exc), code=status.HTTP_400_BAD_REQUEST
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_400_BAD_REQUEST, "message": str(exc)},
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as exc:
-            return self.presenter.present_error(
-                str(exc), code=status.HTTP_401_UNAUTHORIZED
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {
+                        "code": status.HTTP_401_UNAUTHORIZED,
+                        "message": str(exc),
+                    },
+                },
+                status=status.HTTP_401_UNAUTHORIZED,
             )
-        response = self.presenter.present_refresh(access, refresh_value)
+        response = Response(
+            {
+                "status": "success",
+                "data": {"access": access, "refresh": refresh_value},
+                "error": None,
+            },
+            status=status.HTTP_200_OK,
+        )
         secure = not settings.DEBUG
         response.set_cookie(
             key="access_token",

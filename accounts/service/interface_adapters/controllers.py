@@ -5,10 +5,10 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from common.events import publish_event
 from accounts.service.application.use_cases import AccountUseCase
-from accounts.service.interface_adapters.presenters import AccountPresenter
 from accounts.service.infrastructure.django_account_repository import (
     DjangoAccountRepository,
 )
@@ -20,7 +20,6 @@ class AccountController(APIView):
 
     permission_classes = [IsAuthenticated]
     use_case = AccountUseCase(DjangoAccountRepository())
-    presenter = AccountPresenter()
 
     def get(self, request):
         """Retrieve account information for the authenticated user.
@@ -33,12 +32,20 @@ class AccountController(APIView):
         """
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
-            entity = self.use_case.get_account(user_id)
+            dto = self.use_case.get_account(user_id)
         except AccountNotFound as exc:
-            return self.presenter.present_error(
-                str(exc), code=status.HTTP_404_NOT_FOUND
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
-        return self.presenter.present_account(entity)
+        return Response(
+            {"status": "success", "data": dto.to_dict(), "error": None},
+            status=status.HTTP_200_OK,
+        )
 
     def put(self, request):
         """Update account information for the authenticated user.
@@ -52,20 +59,36 @@ class AccountController(APIView):
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         data = request.data
         try:
-            updated = self.use_case.update_account(
+            dto = self.use_case.update_account(
                 user_id,
                 data.get("username"),
                 data.get("email"),
                 data.get("bio"),
                 data.get("profile_picture"),
             )
-        except AccountNotFound:
-            return self.presenter.present_not_found()
+        except AccountNotFound as exc:
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
         except AccountConflict as exc:
-            return self.presenter.present_error(str(exc), code=status.HTTP_409_CONFLICT)
-        entity = updated
-        publish_event("account.updated", entity.to_dict())
-        return self.presenter.present_account(updated)
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_409_CONFLICT, "message": str(exc)},
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        publish_event("account.updated", dto.to_dict())
+        return Response(
+            {"status": "success", "data": dto.to_dict(), "error": None},
+            status=status.HTTP_200_OK,
+        )
 
     def delete(self, request):
         """Delete account for the authenticated user.
@@ -79,7 +102,17 @@ class AccountController(APIView):
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
             self.use_case.delete_account(user_id)
-        except AccountNotFound:
-            return self.presenter.present_not_found()
+        except AccountNotFound as exc:
+            return Response(
+                {
+                    "status": "error",
+                    "data": None,
+                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
         publish_event("account.deleted", {"user_id": user_id})
-        return self.presenter.present_deleted()
+        return Response(
+            {"status": "success", "data": {}, "error": None},
+            status=status.HTTP_204_NO_CONTENT,
+        )

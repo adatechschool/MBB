@@ -14,7 +14,7 @@ from authentication.service.exceptions import (
 )
 from authentication.service.application.repositories import AuthRepositoryInterface
 from authentication.service.domain.entities import AuthModel
-from common.database import User
+from common.models import User
 
 
 class DjangoAuthRepository(AuthRepositoryInterface):

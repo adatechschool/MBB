@@ -2,4 +2,4 @@
 
 """Django ORM model for user accounts."""
 
-from common.database import User  # noqa
+from common.models import User  # noqa

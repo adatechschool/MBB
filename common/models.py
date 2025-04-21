@@ -1,4 +1,4 @@
-# common\database.py
+# common\models.py
 # -*- coding: utf-8 -*-
 
 """Django models for a micro-blogging application.
@@ -52,9 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "username"
-    EMAIL_FIELD = "email"
-    REQUIRED_FIELDS = ["email"]
+    USERNAME_FIELD = "email"
 
     class Meta:
         """Database table configuration for User model."""

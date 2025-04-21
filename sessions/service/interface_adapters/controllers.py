@@ -172,18 +172,6 @@ class CookieTokenRefreshView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        except Exception as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                        "message": str(exc),
-                    },
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
         response = Response(
             {
                 "status": "success",

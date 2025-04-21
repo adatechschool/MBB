@@ -33,7 +33,8 @@ class AccountUseCase:
         bio: str,
         profile_picture: Optional[str],
     ) -> AccountDTO:
-        """Update an account with new information.
+        """
+        Update an account with new information.
 
         Args:
             user_id: The unique identifier of the user
@@ -48,7 +49,8 @@ class AccountUseCase:
         return self.repo.update_account(user_id, username, email, bio, profile_picture)
 
     def delete_account(self, user_id: int) -> None:
-        """Delete an account.
+        """
+        Delete an account.
 
         Args:
             user_id: The unique identifier of the user to delete

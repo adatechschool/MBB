@@ -64,14 +64,15 @@ class AccountClient:
         bio: str = None,
         profile_picture: str = None,
     ) -> AccountDTO:
-        """Update account information for the given user ID.
+        """
+        Update account information for the given user ID.
 
         Args:
             user_id: The unique identifier of the user account to update.
             username: The new username for the account.
             email: The new email address for the account.
             bio: Optional biography text for the user profile.
-            profile_picture: Optional URL to the user's profile picture.
+            profile_picture: Optional URL to the user profile picture.
 
         Returns:
             AccountDTO: Data transfer object containing the updated account information.
@@ -96,7 +97,8 @@ class AccountClient:
         return AccountDTO(**data)
 
     def delete_account(self, user_id: int) -> None:
-        """Delete account for the given user ID.
+        """
+        Delete account for the given user ID.
 
         Args:
             user_id: The unique identifier of the user account to delete.

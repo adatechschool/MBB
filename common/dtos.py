@@ -46,7 +46,7 @@ class AccountDTO(BaseModel):
         Returns:
             Dict containing the DTO's fields and values
         """
-        return self.dict()
+        return self.model_dump()
 
 
 class AuthDTO(BaseModel):
@@ -66,7 +66,7 @@ class AuthDTO(BaseModel):
         Returns:
             Dict containing the DTO's fields and values
         """
-        return self.dict()
+        return self.model_dump()
 
 
 class SessionDTO(BaseModel):
@@ -92,4 +92,4 @@ class SessionDTO(BaseModel):
         Returns:
             Dict containing the DTO's fields and values
         """
-        return self.dict()
+        return self.model_dump()

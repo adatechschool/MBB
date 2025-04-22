@@ -2,19 +2,32 @@
 
 """Authentication service module for JWT token handling via cookies."""
 
-from rest_framework.authentication import BaseAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
-class CookieJWTAuthentication(BaseAuthentication):
+class CookieJWTAuthentication(JWTAuthentication):
     """
-    Example stub: pull JWT from a cookie instead of Authorization header.
+    A SimpleJWT authentication backend that will first look
+    for Authorization: Bearer <token>, then fall back to the
+    'access_token' cookie.
     """
 
+    def get_header(self, request):
+        header = super().get_header(request)
+        if header is not None:
+            return header
+
+        token = request.COOKIES.get("access_token")
+        if token:
+            return f"Bearer {token}".encode("utf-8")
+        return None
+
     def authenticate(self, request):
-        raw_token = request.COOKIES.get("access_token")
-        if not raw_token:
+        header = self.get_header(request)
+        raw_token = self.get_raw_token(header)
+        if raw_token is None:
+            raw_token = request.COOKIES.get("access_token")
+        if raw_token is None:
             return None
-        validated = JWTAuthentication().get_validated_token(raw_token)
-        user = JWTAuthentication().get_user(validated)
-        return (user, validated)
+        validated_token = self.get_validated_token(raw_token)
+        return self.get_user(validated_token), validated_token

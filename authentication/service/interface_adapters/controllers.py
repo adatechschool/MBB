@@ -22,6 +22,9 @@ from authentication.service.exceptions import (
 from sessions.service.client import SessionClient
 from common.events import publish_event
 
+COOKIE_PATH = "/"
+ACCESS_COOKIE_AGE = getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME").total_seconds()
+REFRESH_COOKIE_AGE = getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME").total_seconds()
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RegisterController(APIView):
@@ -42,7 +45,7 @@ class RegisterController(APIView):
         """
         data = request.data
         try:
-            user_id = self.use_case.register(  # noqa
+            self.use_case.register(  # noqa
                 data.get("username"), data.get("email"), data.get("password")
             )
         except UserAlreadyExists as exc:
@@ -101,22 +104,27 @@ class LoginController(APIView):
                 "status": "success",
                 "data": {"access": tokens.access, "refresh": tokens.refresh},
                 "error": None,
-            }
+            },
+            status=status.HTTP_200_OK,
         )
-        secure = not settings.DEBUG
+        secure_flag = not settings.DEBUG
         response.set_cookie(
             key="access_token",
             value=tokens.access,
+            max_age=int(ACCESS_COOKIE_AGE),
             httponly=True,
-            secure=secure,
+            secure=secure_flag,
             samesite="Lax",
+            path=COOKIE_PATH,
         )
         response.set_cookie(
             key="refresh_token",
             value=tokens.refresh,
+            max_age=int(REFRESH_COOKIE_AGE),
             httponly=True,
-            secure=secure,
+            secure=secure_flag,
             samesite="Lax",
+            path=COOKIE_PATH,
         )
         SessionClient().create_session(
             refresh_token=tokens.refresh,
@@ -172,6 +180,6 @@ class LogoutController(APIView):
             {"status": "success", "data": {}, "error": None},
             status=status.HTTP_204_NO_CONTENT,
         )
-        resp.delete_cookie("access_token")
-        resp.delete_cookie("refresh_token")
+        resp.delete_cookie("access_token", path=COOKIE_PATH)
+        resp.delete_cookie("refresh_token", path=COOKIE_PATH)
         return resp

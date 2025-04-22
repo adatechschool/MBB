@@ -23,6 +23,10 @@ from sessions.service.exceptions import (
     SessionRefreshError,
 )
 
+COOKIE_PATH = "/"
+ACCESS_COOKIE_AGE = int(getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME").total_seconds())
+REFRESH_COOKIE_AGE = int(getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME").total_seconds())
+
 
 class SessionController(APIView):
     """Controller for managing user sessions through HTTP endpoints.
@@ -180,19 +184,23 @@ class CookieTokenRefreshView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-        secure = not settings.DEBUG
+        secure_flag = not settings.DEBUG
         response.set_cookie(
             key="access_token",
             value=access,
+            max_age=ACCESS_COOKIE_AGE,
             httponly=True,
-            secure=secure,
+            secure=secure_flag,
             samesite="Lax",
+            path=COOKIE_PATH,
         )
         response.set_cookie(
-            key="refresh_token",
-            value=refresh_value,
+            key="access_token",
+            value=access,
+            max_age=ACCESS_COOKIE_AGE,
             httponly=True,
-            secure=secure,
+            secure=secure_flag,
             samesite="Lax",
+            path=COOKIE_PATH,
         )
         return response

@@ -92,7 +92,8 @@ class AccountController(APIView):
         )
 
     def delete(self, request):
-        """Delete account for the authenticated user.
+        """
+        Delete account for the authenticated user.
 
         Args:
             request: HTTP request object containing user authentication.

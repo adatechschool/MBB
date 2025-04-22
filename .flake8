@@ -13,6 +13,5 @@ exclude =
     venv,
     .venv,
     __pycache__,
-    */migrations/*,
-    micro_blogging.py,
+    */migrations/*
 

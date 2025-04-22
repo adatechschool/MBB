@@ -32,7 +32,8 @@ class AccountDTO(BaseModel):
         bio: Optional[str] = None,
         profile_picture: Optional[str] = None,
     ) -> None:
-        """Update the user's profile information in the DTO.
+        """
+        Update the user's profile information in the DTO.
 
         Args:
             bio: New biography text

@@ -28,6 +28,8 @@ ACCOUNTS_SERVICE_URL = os.getenv("ACCOUNTS_SERVICE_URL", "http://localhost:8002"
 SESSIONS_SERVICE_URL = os.getenv("SESSIONS_SERVICE_URL", "http://localhost:8001")
 AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8000")
 
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "broker1:9092").split(",")
+
 # Apps common to all services
 INSTALLED_APPS = [
     "admin_interface",
@@ -51,14 +53,15 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "authentication.service.authentication.CookieJWTAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=1),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
     "USER_ID_FIELD": "user_id",
     "USER_ID_CLAIM": "user_id",
 }

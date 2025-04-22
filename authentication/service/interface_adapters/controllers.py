@@ -57,6 +57,15 @@ class RegisterController(APIView):
                 },
                 status=status.HTTP_409_CONFLICT,
             )
+        publish_event(
+            "user.created",
+            {
+                "username": data.get("username"),
+                "email": data.get("email"),
+                "bio": "Hey, I'm using DevBlog!",
+                "profile_picture": None,
+            }
+        )
         return Response(
             {
                 "status": "success",

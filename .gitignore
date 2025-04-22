@@ -53,3 +53,5 @@ media/
 *.swp
 *.swo
 .DS_Store
+
+.mypy_cache/

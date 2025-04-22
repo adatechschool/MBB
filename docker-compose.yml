@@ -1,0 +1,58 @@
+# docker-compose.yml
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+
+  authentication:
+    build:
+      context: .
+      dockerfile: authentication/Dockerfile
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:${AUTH_SERVICE_PORT}
+    volumes:
+      - ./authentication:/app
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=authentication.config.settings
+
+  sessions:
+    build:
+      context: .
+      dockerfile: sessions/Dockerfile
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:${SESSION_SERVICE_PORT}
+    volumes:
+      - ./sessions:/app
+    ports:
+      - "${SESSION_SERVICE_PORT}:${SESSION_SERVICE_PORT}"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=sessions.config.settings
+
+  accounts:
+    build:
+      context: .
+      dockerfile: accounts/Dockerfile
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:${ACCOUNT_SERVICE_PORT}
+    volumes:
+      - ./accounts:/app
+    ports:
+      - "${ACCOUNT_SERVICE_PORT}:${ACCOUNT_SERVICE_PORT}"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=accounts.config.settings
+
+volumes:
+  postgres_data:

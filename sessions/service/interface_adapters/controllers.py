@@ -195,7 +195,7 @@ class CookieTokenRefreshView(APIView):
             path=COOKIE_PATH,
         )
         response.set_cookie(
-            key="access_token",
+            key="refresh_token",
             value=access,
             max_age=ACCESS_COOKIE_AGE,
             httponly=True,

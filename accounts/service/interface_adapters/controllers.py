@@ -48,7 +48,8 @@ class AccountController(APIView):
         )
 
     def put(self, request):
-        """Update account information for the authenticated user.
+        """
+        Update account information for the authenticated user.
 
         Args:
             request: HTTP request object containing user authentication and update data.

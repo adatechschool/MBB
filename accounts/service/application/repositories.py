@@ -31,7 +31,8 @@ class AccountRepositoryInterface(ABC):
         bio: str,
         profile_picture: Optional[str],
     ) -> User:
-        """Update an account with the given information.
+        """
+        Update an account with the given information.
 
         Args:
             user_id: The unique identifier of the user.

@@ -15,7 +15,7 @@ class SessionClient:
     BASE_URL = settings.SESSIONS_SERVICE_URL.rstrip("/")
     TIMEOUT = 5
 
-    def create_session(self, refresh_token: str) -> SessionDTO:
+    def create_session(self, refresh_token: str, access_token: str) -> SessionDTO:
         """Create a new session using a refresh token.
 
         Args:
@@ -29,7 +29,10 @@ class SessionClient:
         """
         resp = requests.post(
             f"{self.BASE_URL}/api/sessions/add/",
-            cookies={"refresh_token": refresh_token},
+            cookies={
+                "refresh_token": refresh_token,
+                "access_token": access_token,
+            },
             timeout=self.TIMEOUT,
         )
         resp.raise_for_status()

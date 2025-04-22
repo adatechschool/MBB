@@ -10,6 +10,7 @@ platform, including users, posts, comments, and follow relationships.
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+
 from common.managers import UserManager
 
 

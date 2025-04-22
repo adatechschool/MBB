@@ -6,13 +6,13 @@ import json
 from kafka import KafkaProducer, errors
 
 try:
-    producer = KafkaProducer(
+    PRODUCER = KafkaProducer(
         bootstrap_servers=["broker1:9092"],
         linger_ms=500,
         batch_size=32768,
     )
 except errors.NoBrokersAvailable:
-    producer = None
+    PRODUCER = None
 
 
 def publish_event(topic: str, payload: dict):
@@ -22,8 +22,6 @@ def publish_event(topic: str, payload: dict):
         topic (str): The Kafka topic to publish to
         payload (dict): The event payload to be serialized and published
     """
-    if producer is None:
-        # Broker unavailable; skip publishing gracefully
+    if PRODUCER is None:
         return
-    # Send asynchronously; flush handled by background tasks
-    producer.send(topic, json.dumps(payload).encode("utf-8"))
+    PRODUCER.send(topic, json.dumps(payload).encode("utf-8"))

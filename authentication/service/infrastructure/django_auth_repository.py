@@ -14,7 +14,7 @@ from authentication.service.exceptions import (
 )
 from authentication.service.application.repositories import AuthRepositoryInterface
 from authentication.service.domain.entities import AuthModel
-from common.models import User
+from common.models import User, Role
 
 
 class DjangoAuthRepository(AuthRepositoryInterface):
@@ -23,12 +23,13 @@ class DjangoAuthRepository(AuthRepositoryInterface):
     """
 
     def register(self, username: str, email: str, password: str) -> str:
-        user = User(username=username, email=email)
+        default_role, _ = Role.objects.get_or_create(role_name="user", defaults={})
+        user = User(username=username, email=email, role=default_role)
         user.set_password(password)
         try:
             user.save()
         except IntegrityError as exc:
-            raise UserAlreadyExists("Username or email already taken.") from exc
+            raise UserAlreadyExists(str(exc)) from exc
         return str(user.user_id)
 
     def authenticate(self, username: str, password: str) -> AuthModel:

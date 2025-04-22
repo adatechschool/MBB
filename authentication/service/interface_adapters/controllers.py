@@ -19,7 +19,6 @@ from authentication.service.exceptions import (
     AuthenticationFailed,
     TokenBlacklistError,
 )
-from accounts.service.client import AccountClient
 from sessions.service.client import SessionClient
 from common.events import publish_event
 
@@ -28,6 +27,7 @@ from common.events import publish_event
 class RegisterController(APIView):
     """Controller handling user registration requests."""
 
+    authentication_classes = []
     permission_classes = [AllowAny]
     use_case = AuthUseCase(DjangoAuthRepository())
 
@@ -42,7 +42,7 @@ class RegisterController(APIView):
         """
         data = request.data
         try:
-            user_id = self.use_case.register(
+            user_id = self.use_case.register(  # noqa
                 data.get("username"), data.get("email"), data.get("password")
             )
         except UserAlreadyExists as exc:
@@ -54,7 +54,6 @@ class RegisterController(APIView):
                 },
                 status=status.HTTP_409_CONFLICT,
             )
-        AccountClient().create_account(user_id, data.get("username"), data.get("email"))
         return Response(
             {
                 "status": "success",
@@ -69,6 +68,7 @@ class RegisterController(APIView):
 class LoginController(APIView):
     """Controller handling user login requests."""
 
+    authentication_classes = []
     permission_classes = [AllowAny]
     use_case = AuthUseCase(DjangoAuthRepository())
 
@@ -118,7 +118,10 @@ class LoginController(APIView):
             secure=secure,
             samesite="Lax",
         )
-        SessionClient().create_session(tokens.refresh)
+        SessionClient().create_session(
+            refresh_token=tokens.refresh,
+            access_token=tokens.access,
+        )
         return response
 
 

@@ -3,8 +3,10 @@
 """Django ORM implementation of the account repository interface."""
 
 import base64
+import uuid
 from typing import Optional
 from django.utils import timezone
+from django.core.files.base import ContentFile
 from django.db import IntegrityError
 
 from accounts.service.application.repositories import AccountRepositoryInterface
@@ -13,6 +15,7 @@ from accounts.service.exceptions import AccountNotFound, AccountConflict
 from common.dtos import AccountDTO
 
 ACCOUNT_NOT_FOUND_MESSAGE = "Account not found."
+ALREADY_EXISTS_MESSAGE = "Username or email already taken."
 
 
 class DjangoAccountRepository(AccountRepositoryInterface):
@@ -25,11 +28,18 @@ class DjangoAccountRepository(AccountRepositoryInterface):
             raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
         picture_b64 = None
         if user.profile_picture:
-            picture_b64 = base64.b64encode(user.profile_picture).decode()
+            try:
+                with user.profile_picture.open("rb") as img_file:
+                    raw_bytes = img_file.read()
+                picture_b64 = base64.b64encode(raw_bytes).decode()
+            except Exception as exc:  # noqa
+                picture_b64 = None
         return AccountDTO(
             user_id=user.user_id,
             username=user.username,
             email=user.email,
+            is_active=user.is_active,
+            date_joined=user.date_joined,
             bio=user.bio,
             profile_picture=picture_b64,
             created_at=user.created_at,
@@ -48,11 +58,24 @@ class DjangoAccountRepository(AccountRepositoryInterface):
             user = User.objects.get(user_id=user_id)
         except User.DoesNotExist as exc:
             raise AccountNotFound(ACCOUNT_NOT_FOUND_MESSAGE) from exc
-        user.username = username
-        user.email = email
-        user.bio = bio
+
+        if User.objects.exclude(user_id=user_id).filter(email=email).exists():
+            raise AccountConflict(ALREADY_EXISTS_MESSAGE)
+
+        if User.objects.exclude(user_id=user_id).filter(username=username).exists():
+            raise AccountConflict(ALREADY_EXISTS_MESSAGE)
+
+        user.username = username or user.username
+        user.email = email or user.email
+        user.bio = bio or user.bio
         if profile_picture is not None:
-            user.profile_picture = base64.b64decode(profile_picture)
+            decoded_bytes = base64.b64decode(profile_picture)
+            file_name = f"avatar_{user_id}_{uuid.uuid4().hex}.png"
+            user.profile_picture.save(
+                file_name,
+                ContentFile(decoded_bytes),
+                save=False,
+            )
         user.updated_at = timezone.now()
         try:
             user.save(
@@ -65,7 +88,7 @@ class DjangoAccountRepository(AccountRepositoryInterface):
                 ]
             )
         except IntegrityError as exc:
-            raise AccountConflict("Username or email already taken.") from exc
+            raise AccountConflict(ALREADY_EXISTS_MESSAGE) from exc
         return self.get_account(user_id)
 
     def delete_account(self, user_id: int) -> None:

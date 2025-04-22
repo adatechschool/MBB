@@ -7,7 +7,7 @@ across different services in the application."""
 
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 
 class AccountDTO(BaseModel):
@@ -23,14 +23,14 @@ class AccountDTO(BaseModel):
     is_active: bool
     date_joined: datetime
     bio: Optional[str] = None
-    profile_picture: Optional[HttpUrl] = None
+    profile_picture: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     def update_profile(
         self,
         bio: Optional[str] = None,
-        profile_picture: Optional[HttpUrl] = None,
+        profile_picture: Optional[str] = None,
     ) -> None:
         """Update the user's profile information in the DTO.
 

@@ -1,22 +1,36 @@
 # authentication/Dockerfile
 
-FROM python:3.12-slim
+FROM python:3.13-alpine AS builder
 
-# Set environment variable to prevent Python buffering stdout/stderr
 ENV PYTHONUNBUFFERED=1
-
-# Set working directory
 WORKDIR /app
 
-# Copy requirements and install dependencies
-COPY ../requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN apk add --no-cache \
+    build-base \
+    musl-dev \
+    postgresql-dev
 
-# Copy the rest of the project files
-COPY . /app/
+COPY ../requirements.txt .
+RUN pip install --upgrade pip \
+    && pip wheel --no-cache-dir -w /wheels -r requirements.txt
 
-# Expose the port on which the app will run
+FROM python:3.13-alpine
+
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+RUN apk add --no-cache \
+    libpq
+
+COPY --from=builder /wheels /wheels
+COPY ../requirements.txt .
+RUN pip install --no-cache-dir --no-index --find-links=/wheels -r requirements.txt \
+    && rm -rf /wheels
+
+COPY . .
+
+RUN addgroup -S app && adduser -S app -G app
+USER app
+
 EXPOSE 8000
-
-# Use gunicorn to serve the Django app. The DJANGO_SETTINGS_MODULE is loaded via environment.
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

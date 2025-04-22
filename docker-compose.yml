@@ -10,49 +10,49 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
 
   authentication:
     build:
       context: .
       dockerfile: authentication/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:${AUTH_SERVICE_PORT}
     volumes:
       - ./authentication:/app
     ports:
-      - "8000:8000"
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
+      - DJANGO_SETTINGS_MODULE=authentication.config.settings
 
   sessions:
     build:
       context: .
       dockerfile: sessions/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8001
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:${SESSION_SERVICE_PORT}
     volumes:
       - ./sessions:/app
     ports:
-      - "8001:8001"
+      - "${SESSION_SERVICE_PORT}:${SESSION_SERVICE_PORT}"
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
+      - DJANGO_SETTINGS_MODULE=sessions.config.settings
 
   accounts:
     build:
       context: .
       dockerfile: accounts/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8002
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:${ACCOUNT_SERVICE_PORT}
     volumes:
       - ./accounts:/app
     ports:
-      - "8002:8002"
+      - "${ACCOUNT_SERVICE_PORT}:${ACCOUNT_SERVICE_PORT}"
     env_file:
       - .env
     environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
+      - DJANGO_SETTINGS_MODULE=accounts.config.settings
 
 volumes:
   postgres_data:

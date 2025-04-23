@@ -83,3 +83,10 @@ class PostDTO(BaseModel):
 
     def to_dict(self) -> dict:
         return self.model_dump()
+
+class LikeDTO(BaseModel):
+    post_id: int
+    user_id: int
+
+    def to_dict(self) -> dict:
+        return self.model_dump()

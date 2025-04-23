@@ -29,6 +29,7 @@ SESSIONS_SERVICE_URL = os.getenv("SESSIONS_SERVICE_URL", "http://localhost:8001"
 ACCOUNTS_SERVICE_URL = os.getenv("ACCOUNTS_SERVICE_URL", "http://localhost:8002")
 USERS_SERVICE_URL = os.getenv("USERS_SERVICE_URL", "http://localhost:8003")
 POSTS_SERVICE_URL = os.getenv("POSTS_SERVICE_URL", "http://localhost:8004")
+LIKES_SERVICE_URL = os.getenv("LIKES_SERVICE_URL", "http://localhost:8005")
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092").split(
     ","

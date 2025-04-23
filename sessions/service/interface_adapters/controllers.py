@@ -24,8 +24,12 @@ from sessions.service.exceptions import (
 )
 
 COOKIE_PATH = "/"
-ACCESS_COOKIE_AGE = int(getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME").total_seconds())
-REFRESH_COOKIE_AGE = int(getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME").total_seconds())
+ACCESS_COOKIE_AGE = int(
+    getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME").total_seconds()
+)
+REFRESH_COOKIE_AGE = int(
+    getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME").total_seconds()
+)
 
 
 class SessionController(APIView):

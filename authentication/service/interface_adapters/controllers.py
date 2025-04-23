@@ -23,8 +23,13 @@ from sessions.service.client import SessionClient
 from common.events import publish_event
 
 COOKIE_PATH = "/"
-ACCESS_COOKIE_AGE = getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME").total_seconds()
-REFRESH_COOKIE_AGE = getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME").total_seconds()
+ACCESS_COOKIE_AGE = (
+    getattr(settings, "SIMPLE_JWT", {}).get("ACCESS_TOKEN_LIFETIME").total_seconds()
+)
+REFRESH_COOKIE_AGE = (
+    getattr(settings, "SIMPLE_JWT", {}).get("REFRESH_TOKEN_LIFETIME").total_seconds()
+)
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RegisterController(APIView):
@@ -64,7 +69,7 @@ class RegisterController(APIView):
                 "email": data.get("email"),
                 "bio": "Hey, I'm using DevBlog!",
                 "profile_picture": None,
-            }
+            },
         )
         return Response(
             {

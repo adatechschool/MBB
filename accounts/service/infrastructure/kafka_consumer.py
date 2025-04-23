@@ -47,6 +47,7 @@ def consumer_loop():
         except Exception:
             # log & continue
             import logging
+
             logging.exception("Failed to process user.created message")
 
 

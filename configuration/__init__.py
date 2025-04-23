@@ -1,1 +1,1 @@
-# config\__init__.py
+# configuration\__init__.py

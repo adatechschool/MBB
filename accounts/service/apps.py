@@ -17,4 +17,5 @@ class AccountsServiceConfig(AppConfig):
         if os.environ.get("RUN_MAIN") != "true":
             return
         from accounts.service.infrastructure.kafka_consumer import start_consumer_thread
+
         start_consumer_thread()

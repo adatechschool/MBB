@@ -4,20 +4,21 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from pathlib import Path
+from django.core.management import execute_from_command_line
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Patch for adding project root to PYTHONPATH (Option 3)
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-# ──────────────────────────────────────────────────────────────────────────────
+
+ROOT = Path(__file__).resolve().parent.parent
+
+sys.path.insert(0, str(ROOT))
+
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "configuration.settings.users")
     try:
-        from django.core.management import execute_from_command_line
+        execute_from_command_line(sys.argv)
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "

@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "configuration.settings.accounts")
     try:
         execute_from_command_line(sys.argv)
     except ImportError as exc:

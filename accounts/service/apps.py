@@ -4,7 +4,6 @@
 
 import os
 from django.apps import AppConfig
-from accounts.service.infrastructure.kafka_consumer import start_consumer_thread
 
 
 class AccountsServiceConfig(AppConfig):
@@ -17,4 +16,5 @@ class AccountsServiceConfig(AppConfig):
         """Start the accounts service consumer thread."""
         if os.environ.get("RUN_MAIN") != "true":
             return
+        from accounts.service.infrastructure.kafka_consumer import start_consumer_thread
         start_consumer_thread()

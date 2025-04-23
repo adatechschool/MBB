@@ -1,6 +1,27 @@
 # docker-compose.yml
 
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
   db:
     image: postgres:17
     environment:
@@ -16,43 +37,43 @@ services:
     build:
       context: .
       dockerfile: authentication/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:${AUTH_SERVICE_PORT}
-    volumes:
-      - ./authentication:/app
+    command: gunicorn authentication.config.wsgi:application --bind 0.0.0.0:${AUTH_SERVICE_PORT}
     ports:
       - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     env_file:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=authentication.config.settings
+    volumes:
+      - ./:/app
 
   sessions:
     build:
       context: .
       dockerfile: sessions/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:${SESSION_SERVICE_PORT}
-    volumes:
-      - ./sessions:/app
+    command: gunicorn sessions.config.wsgi:application --bind 0.0.0.0:${SESSION_SERVICE_PORT}
     ports:
       - "${SESSION_SERVICE_PORT}:${SESSION_SERVICE_PORT}"
     env_file:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=sessions.config.settings
+    volumes:
+      - ./:/app
 
   accounts:
     build:
       context: .
       dockerfile: accounts/Dockerfile
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:${ACCOUNT_SERVICE_PORT}
-    volumes:
-      - ./accounts:/app
+    command: gunicorn accounts.config.wsgi:application --bind 0.0.0.0:${ACCOUNT_SERVICE_PORT}
     ports:
       - "${ACCOUNT_SERVICE_PORT}:${ACCOUNT_SERVICE_PORT}"
     env_file:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=accounts.config.settings
+    volumes:
+      - ./:/app
 
 volumes:
   postgres_data:

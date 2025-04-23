@@ -42,5 +42,3 @@ class PostCreateController(APIView):
             {"status": "success", "data": dto.to_dict(), "error": None},
             status=status.HTTP_201_CREATED,
         )
-
-

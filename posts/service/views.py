@@ -12,4 +12,3 @@ urlpatterns = [
     path("list/", PostListController.as_view(), name="posts_list"),
     path("create/", PostCreateController.as_view(), name="posts_create"),
 ]
-

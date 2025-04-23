@@ -44,8 +44,11 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=authentication.config.settings
+    working_dir: /app/authentication
     volumes:
       - ./:/app
+    depends_on:
+      - db
 
   sessions:
     build:
@@ -58,8 +61,11 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=sessions.config.settings
+    working_dir: /app/sessions
     volumes:
       - ./:/app
+    depends_on:
+      - db
 
   accounts:
     build:
@@ -72,8 +78,11 @@ services:
       - .env
     environment:
       - DJANGO_SETTINGS_MODULE=accounts.config.settings
+    working_dir: /app/accounts
     volumes:
       - ./:/app
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

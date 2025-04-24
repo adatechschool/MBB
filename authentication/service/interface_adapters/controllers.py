@@ -178,7 +178,10 @@ class LogoutController(APIView):
                 http_status=status.HTTP_400_BAD_REQUEST,
             )
         publish_event("user.logged_out", {"user_id": request.user.user_id})
-        resp = success(http_status=status.HTTP_204_NO_CONTENT)
+        resp = success(
+            data={},
+            http_status=status.HTTP_200_OK
+        )
         resp.delete_cookie("access_token", path=COOKIE_PATH)
         resp.delete_cookie("refresh_token", path=COOKIE_PATH)
         return resp

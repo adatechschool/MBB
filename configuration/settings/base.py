@@ -94,9 +94,11 @@ CORS_ALLOW_HEADERS = [
     "content-type",
 ]
 
-SESSION_COOKIE_SECURE = os.getenv("DEBUG") == "True"
-CSRF_COOKIE_SECURE = os.getenv("DEBUG") == "True"
-# SECURE_SSL_REDIRECT = os.getenv("DEBUG") == "True"
+COOKIE_SECURE = not DEBUG
+
+SESSION_COOKIE_SECURE = COOKIE_SECURE
+CSRF_COOKIE_SECURE = COOKIE_SECURE
+SECURE_SSL_REDIRECT = COOKIE_SECURE
 
 # URLs & WSGI defaults (override per-service as needed)
 ROOT_URLCONF = "config.urls"

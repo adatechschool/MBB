@@ -30,8 +30,6 @@ class AccountController(APIView):
         Returns:
             Response object with account data or not found error.
         """
-        print("COOKIES: ", request.COOKIES)
-        print("AUTH HEADER: ", request.META.get("HTTP_AUTHORIZATION"))
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
             dto = self.use_case.get_account(user_id)

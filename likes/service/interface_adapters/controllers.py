@@ -13,7 +13,6 @@ from likes.service.infrastructure.django_like_repository import DjangoLikeReposi
 
 class LikesController(APIView):
     """Controller for listing all likes without authentication"""
-   
 
     permission_classes = [AllowAny]
     use_case = LikeUseCase(DjangoLikeRepository())

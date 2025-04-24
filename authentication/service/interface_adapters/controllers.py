@@ -2,9 +2,9 @@
 
 """Controller for authentication-related HTTP requests and responses."""
 
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -31,7 +31,14 @@ REFRESH_COOKIE_AGE = (
 )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
+class CsrfRefreshController(APIView):
+    permission_classes = [AllowAny]
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        # simply returns 200 after setting the csrftoken cookie
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
+
 class RegisterController(APIView):
     """Controller handling user registration requests."""
 
@@ -50,7 +57,7 @@ class RegisterController(APIView):
         """
         data = request.data
         try:
-            self.use_case.register(  # noqa
+            user_id = self.use_case.register(  # noqa
                 data.get("username"), data.get("email"), data.get("password")
             )
         except UserAlreadyExists as exc:
@@ -63,13 +70,12 @@ class RegisterController(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
         publish_event(
-            "user.created",
+            "user.registered",
             {
+                "user_id": user_id,
                 "username": data.get("username"),
                 "email": data.get("email"),
-                "bio": "Hey, I'm using DevBlog!",
-                "profile_picture": None,
-            },
+            }
         )
         return Response(
             {
@@ -81,7 +87,6 @@ class RegisterController(APIView):
         )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class LoginController(APIView):
     """Controller handling user login requests."""
 
@@ -99,8 +104,10 @@ class LoginController(APIView):
             HTTP response with login result and authentication cookies
         """
         data = request.data
+        email = data.get("email")
+        password = data.get("password")
         try:
-            tokens = self.use_case.login(data.get("username"), data.get("password"))
+            tokens = self.use_case.login(email, password)
         except AuthenticationFailed as exc:
             return Response(
                 {
@@ -121,7 +128,7 @@ class LoginController(APIView):
             },
             status=status.HTTP_200_OK,
         )
-        secure_flag = not settings.DEBUG
+        secure_flag = settings.COOKIE_SECURE
         response.set_cookie(
             key="access_token",
             value=tokens.access,
@@ -144,10 +151,10 @@ class LoginController(APIView):
             refresh_token=tokens.refresh,
             access_token=tokens.access,
         )
+        publish_event("user.logged_in", {"email": email})
         return response
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class LogoutController(APIView):
     """Controller handling user logout requests by invalidating
     and removing authentication tokens."""

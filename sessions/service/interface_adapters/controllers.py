@@ -188,7 +188,7 @@ class CookieTokenRefreshView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-        secure_flag = not settings.DEBUG
+        secure_flag = settings.COOKIE_SECURE
         response.set_cookie(
             key="access_token",
             value=access,

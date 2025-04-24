@@ -3,6 +3,8 @@
 """Authentication service module for JWT token handling via cookies."""
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.middleware.csrf import CsrfViewMiddleware
+from rest_framework.exceptions import AuthenticationFailed
 
 
 class CookieJWTAuthentication(JWTAuthentication):
@@ -31,4 +33,7 @@ class CookieJWTAuthentication(JWTAuthentication):
         if raw_token is None:
             return None
         validated_token = self.get_validated_token(raw_token)
+        reason = CsrfViewMiddleware().process_view(request._request, None, (), {})
+        if reason:
+            raise AuthenticationFailed(f"CSRF Failed: {reason}")
         return self.get_user(validated_token), validated_token

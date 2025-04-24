@@ -22,7 +22,7 @@ class DjangoAuthRepository(AuthRepositoryInterface):
     operations.
     """
 
-    def register(self, username: str, email: str, password: str) -> str:
+    def register(self, username: str, email: str, password: str) -> int:
         default_role, _ = Role.objects.get_or_create(role_name="user", defaults={})
         user = User(username=username, email=email, role=default_role)
         user.set_password(password)
@@ -30,7 +30,7 @@ class DjangoAuthRepository(AuthRepositoryInterface):
             user.save()
         except IntegrityError as exc:
             raise UserAlreadyExists(str(exc)) from exc
-        return str(user.user_id)
+        return user.user_id
 
     def authenticate(self, username: str, password: str) -> AuthModel:
         user = authenticate(username=username, password=password)

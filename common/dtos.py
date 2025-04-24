@@ -72,3 +72,21 @@ class SessionDTO(BaseModel):
     def to_dict(self) -> dict:
         """Convert the DTO to a standard dictionary."""
         return self.model_dump()
+
+
+class PostDTO(BaseModel):
+    post_id: int
+    user_id: int
+    post_content: str
+    created_at: datetime
+    updated_at: datetime
+
+    def to_dict(self) -> dict:
+        return self.model_dump()
+
+class LikeDTO(BaseModel):
+    post_id: int
+    user_id: int
+
+    def to_dict(self) -> dict:
+        return self.model_dump()

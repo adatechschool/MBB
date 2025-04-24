@@ -98,8 +98,10 @@ class LoginController(APIView):
             HTTP response with login result and authentication cookies
         """
         data = request.data
+        email = data.get("email")
+        password = data.get("password")
         try:
-            tokens = self.use_case.login(data.get("username"), data.get("password"))
+            tokens = self.use_case.login(email, password)
         except AuthenticationFailed as exc:
             return Response(
                 {
@@ -143,6 +145,7 @@ class LoginController(APIView):
             refresh_token=tokens.refresh,
             access_token=tokens.access,
         )
+        publish_event("user.logged_in", {"email": email})
         return response
 
 

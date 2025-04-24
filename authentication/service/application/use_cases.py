@@ -25,7 +25,7 @@ class AuthUseCase:
         """
         return self.repo.register(username, email, password)
 
-    def login(self, username: str, password: str) -> AuthModel:
+    def login(self, email: str, password: str) -> AuthModel:
         """Authenticate a user with the given credentials.
 
         Args:
@@ -35,7 +35,7 @@ class AuthUseCase:
         Returns:
             AuthModel: Authentication tokens for the user
         """
-        return self.repo.authenticate(username, password)
+        return self.repo.authenticate(email, password)
 
     def logout(self, refresh_token: str) -> None:
         """Blacklist a refresh token to logout the user.

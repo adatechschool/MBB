@@ -28,6 +28,7 @@ class AuthClient:
         resp = requests.post(
             f"{self.BASE_URL}/api/auth/register/",
             json={"username": username, "email": email, "password": password},
+            timeout=30,
         )
         resp.raise_for_status()
         data = resp.json()["data"]
@@ -37,7 +38,7 @@ class AuthClient:
         )
         return data.get("user_id")
 
-    def login(self, username: str, password: str) -> AuthDTO:
+    def login(self, email: str, password: str) -> AuthDTO:
         """Authenticate a user with their credentials.
 
         Args:
@@ -49,11 +50,12 @@ class AuthClient:
         """
         resp = requests.post(
             f"{self.BASE_URL}/api/auth/login/",
-            json={"username": username, "password": password},
+            json={"email": email, "password": password},
+            timeout=30,
         )
         resp.raise_for_status()
         data = resp.json()["data"]
-        publish_event("user.logged_in", {"username": username})
+        publish_event("user.logged_in", {"email": email})
         return AuthDTO(access=data["access"], refresh=data["refresh"])
 
     def logout(self, refresh_token: str) -> None:
@@ -65,6 +67,6 @@ class AuthClient:
         Returns:
             None
         """
-        resp = requests.post(f"{self.BASE_URL}/api/auth/logout/")
+        resp = requests.post(f"{self.BASE_URL}/api/auth/logout/", timeout=30)
         resp.raise_for_status()
         publish_event("user.logged_out", {"refresh_token": refresh_token})

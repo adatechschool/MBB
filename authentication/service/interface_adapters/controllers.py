@@ -8,7 +8,6 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
 
 from authentication.service.application.use_cases import AuthUseCase
 from authentication.service.infrastructure.django_auth_repository import (
@@ -21,6 +20,7 @@ from authentication.service.exceptions import (
 )
 from sessions.service.client import SessionClient
 from common.events import publish_event
+from common.response import success, error
 
 COOKIE_PATH = "/"
 ACCESS_COOKIE_AGE = (
@@ -36,8 +36,10 @@ class CsrfRefreshController(APIView):
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
-        # simply returns 200 after setting the csrftoken cookie
-        return Response({"status": "success"}, status=status.HTTP_200_OK)
+        return success(
+            data={},
+            http_status=status.HTTP_200_OK
+        )
 
 class RegisterController(APIView):
     """Controller handling user registration requests."""
@@ -61,13 +63,9 @@ class RegisterController(APIView):
                 data.get("username"), data.get("email"), data.get("password")
             )
         except UserAlreadyExists as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_409_CONFLICT, "message": str(exc)},
-                },
-                status=status.HTTP_409_CONFLICT,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_409_CONFLICT,
             )
         publish_event(
             "user.registered",
@@ -77,13 +75,9 @@ class RegisterController(APIView):
                 "email": data.get("email"),
             }
         )
-        return Response(
-            {
-                "status": "success",
-                "data": {"detail": "Registration successful."},
-                "error": None,
-            },
-            status=status.HTTP_201_CREATED,
+        return success(
+            {"detail": "Registration successful."},
+            http_status=status.HTTP_201_CREATED,
         )
 
 
@@ -109,24 +103,13 @@ class LoginController(APIView):
         try:
             tokens = self.use_case.login(email, password)
         except AuthenticationFailed as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_401_UNAUTHORIZED,
-                        "message": str(exc),
-                    },
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
-        response = Response(
-            {
-                "status": "success",
-                "data": {"access": tokens.access, "refresh": tokens.refresh},
-                "error": None,
-            },
-            status=status.HTTP_200_OK,
+        response = success(
+            {"access": tokens.access, "refresh": tokens.refresh},
+            http_status=status.HTTP_200_OK,
         )
         secure_flag = settings.COOKIE_SECURE
         response.set_cookie(
@@ -174,33 +157,19 @@ class LogoutController(APIView):
         """
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_401_UNAUTHORIZED,
-                        "message": "Refresh token not provided.",
-                    },
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error(
+                message="Refresh token not provided.",
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
         try:
             self.use_case.logout(refresh_token)
         except TokenBlacklistError as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_400_BAD_REQUEST, "message": str(exc)},
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_400_BAD_REQUEST,
             )
         publish_event("user.logged_out", {"user_id": request.user.user_id})
-        resp = Response(
-            {"status": "success", "data": {}, "error": None},
-            status=status.HTTP_204_NO_CONTENT,
-        )
+        resp = success(http_status=status.HTTP_204_NO_CONTENT)
         resp.delete_cookie("access_token", path=COOKIE_PATH)
         resp.delete_cookie("refresh_token", path=COOKIE_PATH)
         return resp

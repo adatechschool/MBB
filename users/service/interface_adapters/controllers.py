@@ -5,8 +5,8 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
+from common.response import success, error # noqa
 from users.service.application.use_cases import UserUseCase
 from users.service.infrastructure.django_user_repository import DjangoUserRepository
 
@@ -24,7 +24,7 @@ class UsersController(APIView):
         """
         dtos = self.use_case.get_all_users()
         payload = [dto.to_dict() for dto in dtos]
-        return Response(
-            {"status": "success", "data": payload, "error": None},
-            status=status.HTTP_200_OK,
+        return success(
+            data=payload,
+            http_status=status.HTTP_200_OK,
     )

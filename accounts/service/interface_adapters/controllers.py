@@ -5,9 +5,9 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
 from common.events import publish_event
+from common.response import success, error
 from accounts.service.application.use_cases import AccountUseCase
 from accounts.service.infrastructure.django_account_repository import (
     DjangoAccountRepository,
@@ -36,17 +36,13 @@ class AccountController(APIView):
         try:
             dto = self.use_case.get_account(user_id)
         except AccountNotFound as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_404_NOT_FOUND,
             )
-        return Response(
-            {"status": "success", "data": dto.to_dict(), "error": None},
-            status=status.HTTP_200_OK,
+        return success(
+            data=dto.to_dict(),
+            http_status=status.HTTP_200_OK,
         )
 
     def put(self, request):
@@ -70,27 +66,19 @@ class AccountController(APIView):
                 data.get("profile_picture"),
             )
         except AccountNotFound as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_404_NOT_FOUND,
             )
         except AccountConflict as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_409_CONFLICT, "message": str(exc)},
-                },
-                status=status.HTTP_409_CONFLICT,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_409_CONFLICT,
             )
         publish_event("account.updated", dto.to_dict())
-        return Response(
-            {"status": "success", "data": dto.to_dict(), "error": None},
-            status=status.HTTP_200_OK,
+        return success(
+            data=dto.to_dict(),
+            http_status=status.HTTP_200_OK,
         )
 
     def delete(self, request):
@@ -107,16 +95,12 @@ class AccountController(APIView):
         try:
             self.use_case.delete_account(user_id)
         except AccountNotFound as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_404_NOT_FOUND,
             )
         publish_event("account.deleted", {"user_id": user_id})
-        return Response(
-            {"status": "success", "data": {}, "error": None},
-            status=status.HTTP_204_NO_CONTENT,
+        return success(
+            data={},
+            http_status=status.HTTP_204_NO_CONTENT,
         )

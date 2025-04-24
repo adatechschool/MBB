@@ -8,11 +8,11 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from common.response import success, error
 from sessions.service.application.use_cases import SessionUseCase
 from sessions.service.infrastructure.django_session_repository import (
     DjangoSessionRepository,
@@ -53,32 +53,21 @@ class SessionController(APIView):
         """
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_401_UNAUTHORIZED,
-                        "message": "Refresh token not provided.",
-                    },
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error(
+                message="Refresh token not provided.",
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
         user_id = getattr(request.user, "user_id", None) or getattr(request.user, "id")
         try:
             dto = self.use_case.create_session(user_id, refresh_token)
         except SessionCreateError as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_400_BAD_REQUEST, "message": str(exc)},
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_400_BAD_REQUEST,
             )
-        return Response(
-            {"status": "success", "data": dto.to_dict(), "error": None},
-            status=status.HTTP_201_CREATED,
+        return success(
+            data=dto.to_dict(),
+            http_status=status.HTTP_201_CREATED,
         )
 
     def get(self, request):
@@ -94,21 +83,13 @@ class SessionController(APIView):
         try:
             dtos = self.use_case.get_current_sessions(user_id)
         except SessionNotFound as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {"code": status.HTTP_404_NOT_FOUND, "message": str(exc)},
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_404_NOT_FOUND,
             )
-        return Response(
-            {
-                "status": "success",
-                "data": [dto.to_dict() for dto in dtos],
-                "error": None,
-            },
-            status=status.HTTP_200_OK,
+        return success(
+            data=[dto.to_dict() for dto in dtos],
+            http_status=status.HTTP_200_OK,
         )
 
 
@@ -134,16 +115,9 @@ class CookieTokenRefreshView(APIView):
         """
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_401_UNAUTHORIZED,
-                        "message": "Refresh token not provided.",
-                    },
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error(
+                message="Refresh token not provided.",
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
         try:
             serializer = TokenRefreshSerializer(data={"refresh": refresh_token})
@@ -157,36 +131,18 @@ class CookieTokenRefreshView(APIView):
             else:
                 refresh_value = refresh_token
         except TokenError as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_401_UNAUTHORIZED,
-                        "message": str(exc),
-                    },
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_401_UNAUTHORIZED,
             )
         except SessionRefreshError as exc:
-            return Response(
-                {
-                    "status": "error",
-                    "data": None,
-                    "error": {
-                        "code": status.HTTP_400_BAD_REQUEST,
-                        "message": str(exc),
-                    },
-                },
-                status=status.HTTP_400_BAD_REQUEST,
+            return error(
+                message=str(exc),
+                http_status=status.HTTP_400_BAD_REQUEST,
             )
-        response = Response(
-            {
-                "status": "success",
-                "data": {"access": access, "refresh": refresh_value},
-                "error": None,
-            },
-            status=status.HTTP_200_OK,
+        response = success(
+            data={"access": access, "refresh": refresh_value},
+            http_status=status.HTTP_200_OK,
         )
         secure_flag = settings.COOKIE_SECURE
         response.set_cookie(

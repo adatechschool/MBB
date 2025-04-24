@@ -2,9 +2,9 @@
 
 """Controller for authentication-related HTTP requests and responses."""
 
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -31,7 +31,14 @@ REFRESH_COOKIE_AGE = (
 )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
+class CsrfRefreshController(APIView):
+    permission_classes = [AllowAny]
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        # simply returns 200 after setting the csrftoken cookie
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
+
 class RegisterController(APIView):
     """Controller handling user registration requests."""
 
@@ -80,7 +87,6 @@ class RegisterController(APIView):
         )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class LoginController(APIView):
     """Controller handling user login requests."""
 
@@ -149,7 +155,6 @@ class LoginController(APIView):
         return response
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class LogoutController(APIView):
     """Controller handling user logout requests by invalidating
     and removing authentication tokens."""

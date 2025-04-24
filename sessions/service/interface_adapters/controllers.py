@@ -150,8 +150,8 @@ class CookieTokenRefreshView(APIView):
             serializer.is_valid(raise_exception=True)
             access = serializer.validated_data["access"]
             new_refresh = serializer.validated_data.get("refresh")
-            RefreshToken(refresh_token).blacklist()
             if new_refresh:
+                RefreshToken(refresh_token).blacklist()
                 self.use_case.refresh_session(refresh_token, new_refresh)
                 refresh_value = new_refresh
             else:

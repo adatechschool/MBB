@@ -1,13 +1,12 @@
 # accounts/service/infrastructure/kafka_consumer.py
 import json
 import threading
-import time
 from kafka import KafkaConsumer
 from django.conf import settings
 from common.models import User, Role
 
-TOPIC = "user.created"
-BOOTSTRAP_SERVERS = settings.KAFKA_BOOTSTRAP_SERVERS  # e.g. ["broker1:9092"]
+TOPIC = "user.registered"
+BOOTSTRAP_SERVERS = settings.KAFKA_BOOTSTRAP_SERVERS
 
 
 def process_message(message):
@@ -28,7 +27,7 @@ def process_message(message):
         username=username,
         email=email,
         role=default_role,
-        password="",  # Auth service manages passwords
+        password="",
         is_active=True,
     )
 

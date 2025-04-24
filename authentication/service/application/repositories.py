@@ -11,7 +11,7 @@ class AuthRepositoryInterface(ABC):
     """Interface for authentication-related persistence operations."""
 
     @abstractmethod
-    def register(self, username: str, email: str, password: str) -> None:
+    def register(self, username: str, email: str, password: str) -> int:
         """Create a new user account"""
 
     @abstractmethod

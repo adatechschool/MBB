@@ -1,4 +1,4 @@
-# config/settings/sessions.py
+# configuration\settings\sessions.py
 
 """Django settings for the sessions service."""
 

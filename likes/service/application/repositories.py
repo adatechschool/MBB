@@ -1,4 +1,4 @@
-# posts\service\application\repositories.py
+# likes\service\application\repositories.py
 
 from abc import ABC, abstractmethod
 from typing import List

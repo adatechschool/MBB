@@ -50,7 +50,7 @@ class RegisterController(APIView):
         """
         data = request.data
         try:
-            self.use_case.register(  # noqa
+            user_id = self.use_case.register(  # noqa
                 data.get("username"), data.get("email"), data.get("password")
             )
         except UserAlreadyExists as exc:
@@ -63,13 +63,12 @@ class RegisterController(APIView):
                 status=status.HTTP_409_CONFLICT,
             )
         publish_event(
-            "user.created",
+            "user.registered",
             {
+                "user_id": user_id,
                 "username": data.get("username"),
                 "email": data.get("email"),
-                "bio": "Hey, I'm using DevBlog!",
-                "profile_picture": None,
-            },
+            }
         )
         return Response(
             {

@@ -100,5 +100,5 @@ class AccountController(APIView):
         publish_event("account.deleted", {"user_id": user_id})
         return success(
             data={},
-            http_status=status.HTTP_204_NO_CONTENT,
+            http_status=status.HTTP_200_OK,
         )

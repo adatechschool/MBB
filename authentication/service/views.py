@@ -8,10 +8,12 @@ from authentication.service.interface_adapters.controllers import (
     RegisterController,
     LoginController,
     LogoutController,
+    CsrfRefreshController
 )
 
 urlpatterns = [
     path("login/", LoginController.as_view(), name="login"),
     path("register/", RegisterController.as_view(), name="register"),
     path("logout/", LogoutController.as_view(), name="logout"),
+    path("csrf/", CsrfRefreshController.as_view(), name="csrf"),
 ]

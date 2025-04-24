@@ -32,10 +32,19 @@ REFRESH_COOKIE_AGE = (
 
 
 class CsrfRefreshController(APIView):
+    """Controller for refreshing CSRF tokens and ensuring CSRF cookie is set."""
     permission_classes = [AllowAny]
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
+        """Endpoint to refresh CSRF token and ensure CSRF cookie is set.
+        
+        Args:
+            request: HTTP request object
+            
+        Returns:
+            Success response with HTTP 200 status
+        """
         return success(
             data={},
             http_status=status.HTTP_200_OK

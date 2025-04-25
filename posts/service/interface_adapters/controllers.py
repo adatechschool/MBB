@@ -2,10 +2,14 @@
 
 """Controller for post-related HTTP requests and responses."""
 
+from django.db.models import Count, Exists, OuterRef
+
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from common.response import success, error
+from common.models import Post, Like
 from posts.service.application.use_cases import PostUseCase
 from posts.service.infrastructure.django_post_repository import DjangoPostRepository
 
@@ -15,12 +19,33 @@ _use_case = PostUseCase(DjangoPostRepository())
 class PostListController(APIView):
     """GET /api/posts/ → list all posts."""
 
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        dtos = _use_case.list_posts()
-        return success(
-            data=[dto.to_dict() for dto in dtos],
-            http_status=status.HTTP_200_OK,
+        qs = (
+            Post.objects.all()
+            .annotate(
+                likes_count=Count("like"),
+                liked_by_user=Exists(
+                    Like.objects.filter(post=OuterRef("pk"), user=request.user)
+                ),
+            )
+            .order_by("-created_at")
         )
+
+        payload = []
+        for p in qs:
+            payload.append({
+                "post_id": p.post_id,
+                "user_id": p.user_id,
+                "post_content": p.post_content,
+                "created_at": p.created_at,
+                "updated_at": p.updated_at,
+                "likes_count": p.likes_count,
+                "liked_by_user": p.liked_by_user,
+            })
+
+        return success(data=payload, http_status=status.HTTP_200_OK)
 
 
 class PostCreateController(APIView):
